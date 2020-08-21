@@ -2,7 +2,6 @@ import os, json
 import math
 import matplotlib.pyplot as plt
 import numpy as np
-import scipy.ndimage
 
 # path dos arquivos
 path = './angles/'
@@ -10,6 +9,8 @@ path = './angles/'
 
 def medias(string):
     a = []
+
+
     a_t = []
     med = []
     s = []
@@ -48,30 +49,30 @@ def medias(string):
 def plot(data, string):
     line = min(data)
     line2 = max(data)
-    #plt.text(0,line2,"IC",fontsize=15)                           #initial contact
+    x = len(data)
+    #plt.text(0,line2,"IC",fontsize=15)                   #initial contact
     plt.axvline(0, color='gray', linewidth=3.0)
-    #plt.text(len(data)*0.1,line2,"LR",fontsize=15)               #loanding response
-    plt.axvline(len(data)*0.1, color='gray', linewidth=3.0)
-    #plt.text(len(data)*0.3,line2,"MS",fontsize=15)               #mid stance
-    plt.axvline(len(data)*0.3, color='gray', linewidth=3.0)
-    #plt.text(len(data)*0.5,line2,"TS",fontsize=15)               #terminal stance
-    plt.axvline(len(data)*0.5, color='gray', linewidth=3.0)
-    #plt.text(len(data)*0.6,line2,"PS",fontsize=15)               #pre swing
-    plt.axvline(len(data)*0.6, color='gray', linewidth=3.0)
-    #plt.text(len(data)*0.7,line2,"IS",fontsize=15)               #initial swing
-    plt.axvline(len(data)*0.7, color='gray', linewidth=3.0)
-    #plt.text(len(data)*0.85,line2,"MS",fontsize=15)              #mid swing
-    plt.axvline(len(data)*0.85, color='gray', linewidth=3.0)
-    #plt.text(len(data),line2,"TS",fontsize=15)                   #terminal swing
-    plt.axvline(len(data), color='gray', linewidth=3.0)
-    plt.text(len(data)*0.05, line, "Stance phase", fontsize=20)
+    #plt.text(x*0.1,line2,"LR",fontsize=15)               #loanding response
+    plt.axvline(x*0.1, color='gray', linewidth=3.0)
+    #plt.text(x*0.3,line2,"MS",fontsize=15)               #mid stance
+    plt.axvline(x*0.3, color='gray', linewidth=3.0)
+    #plt.text(x*0.5,line2,"TS",fontsize=15)               #terminal stance
+    plt.axvline(x*0.5, color='gray', linewidth=3.0)
+    #plt.text(x*0.6,line2,"PS",fontsize=15)               #pre swing
+    plt.axvline(x*0.6, color='gray', linewidth=3.0)
+    #plt.text(x*0.7,line2,"IS",fontsize=15)               #initial swing
+    plt.axvline(x*0.7, color='gray', linewidth=3.0)
+    #plt.text(x*0.85,line2,"MS",fontsize=15)              #mid swing
+    plt.axvline(x*0.85, color='gray', linewidth=3.0)
+    #plt.text(x,line2,"TS",fontsize=15)                   #terminal swing
+    plt.axvline(x, color='gray', linewidth=3.0)
+    plt.text(x*0.05, line, "Stance phase", fontsize=20)
     plt.axhline(line, xmin=0., xmax=0.6, color='g', linewidth=3.0)
-    #plt.text(60, line, "Swing phase", fontsize=20)
-    plt.text(len(data)*0.65, line, "Swing phase", fontsize=20)
+    plt.text(x*0.65, line, "Swing phase", fontsize=20)
     plt.axhline(line, xmin=0.6, xmax=1, color='r', linewidth=3.0)
     ax1 = plt.subplot(111)
-    ax1.set_xlim(len(data))
-    ax1.set_xticks([0, len(data)*0.1, len(data)*0.3, len(data)*0.5, len(data)*0.6, len(data)*0.7, len(data)*0.85, len(data)])
+    ax1.set_xlim(x)
+    ax1.set_xticks([0, x*0.1, x*0.3, x*0.5, x*0.6, x*0.7, x*0.85, x])
     ax1.set_xticklabels(['0', '10', '30', '50', '60', '70', '85', '100'])
     plt.plot(data, linewidth=6.0)
     plt.title(string)
