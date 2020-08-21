@@ -6,8 +6,6 @@ import math
 import matplotlib.pyplot as plt
 import numpy as np
 import scipy.ndimage
-import scipy.signal as sig
-import scipy.fftpack as sy
 
 
 # ------------------------------------------------------------------------------------
@@ -100,8 +98,9 @@ def segmenta(data, indexes, string, n):
         finish = indexes[index + 1]
         print(start, finish)
         segdata = data[start:finish]
+        x = list(range(start, finish))
         plt.title('segmentos de um ciclo')
-        plt.plot(segdata, 'r')
+        plt.plot(x, segdata, 'r')
         plt.xlabel('frames')
         plt.show()
 
@@ -116,7 +115,6 @@ def plot(data, string, n):
     plt.title(string)
     plt.xlabel('frames')
     plt.ylabel('extension<-angle(degrees)->flexion')
-    #plt.savefig('teste.png', format='png')
     plt.show()
 
 
@@ -220,52 +218,45 @@ for index, js in enumerate(json_files):
     laa = get_angle(left_knee, left_ankle, left_foot, 'tornozelo')
     left_ankle_angle.insert(index, laa)
 
-    #rha = 180 - get_angle(trunk, right_hip, right_knee, 'quadril')
-    #right_hip_angle.insert(index, rha)
+    rha = 180 - get_angle(trunk, right_hip, right_knee, 'quadril')
+    right_hip_angle.insert(index, rha)
 
-    #rka = 180 - get_angle(right_hip, right_knee, right_ankle, 'joelho')
-    #right_knee_angle.insert(index, rka)
+    rka = 180 - get_angle(right_hip, right_knee, right_ankle, 'joelho')
+    right_knee_angle.insert(index, rka)
 
-    #raa = 90 - get_angle(right_knee, right_ankle, right_foot, 'tornozelo')
-    #right_ankle_angle.insert(index, raa)
+    raa = 90 - get_angle(right_knee, right_ankle, right_foot, 'tornozelo')
+    right_ankle_angle.insert(index, raa)
 
     head_pos.insert(index, head[1])
 
-#função implementa um filtro gaussiano 1-D. O desvio padrão do filtro gaussiano é passado pelo parâmetro sigma
+# função implementa um filtro gaussiano 1-D. O desvio padrão do filtro gaussiano é passado pelo parâmetro sigma
 left_knee_angle = scipy.ndimage.gaussian_filter(left_knee_angle, sigma=3)
 left_hip_angle = scipy.ndimage.gaussian_filter(left_hip_angle, sigma=5)
 left_ankle_angle = scipy.ndimage.gaussian_filter(left_ankle_angle, sigma=5)
 
-#right_knee_angle = scipy.ndimage.gaussian_filter(right_knee_angle, sigma=5)
-#right_hip_angle = scipy.ndimage.gaussian_filter(right_hip_angle, sigma=5)
-#right_ankle_angle = scipy.ndimage.gaussian_filter(right_ankle_angle, sigma=2)
+right_knee_angle = scipy.ndimage.gaussian_filter(right_knee_angle, sigma=5)
+right_hip_angle = scipy.ndimage.gaussian_filter(right_hip_angle, sigma=5)
+right_ankle_angle = scipy.ndimage.gaussian_filter(right_ankle_angle, sigma=2)
 
 head_pos = scipy.ndimage.gaussian_filter(head_pos, sigma=2)
 
 leftciclos = detecta_segmento(left_hip_angle)
-#rightciclos = detecta_segmento(right_hip_angle)
+rightciclos = detecta_segmento(right_hip_angle)
 
 segmenta(left_knee_angle, leftciclos, 'medknee_angle.npy', 0)
 plot(left_knee_angle, "angulo do joelho esquerdo", 0)
-#print(left_knee_angle)
-np.save('left_knee_angle', left_knee_angle)
 
 segmenta(left_hip_angle, leftciclos, 'medhip_angle.npy', 1)
 plot(left_hip_angle, "angulo do quadril esquerdo", 1)
-np.save('left_hip_angle', left_hip_angle)
 
 segmenta(left_ankle_angle, leftciclos, 'medankle_angle.npy', 2)
 plot(left_ankle_angle, "angulo do tornozelo esquerdo", 2)
-np.save('left_ankle_angle', left_ankle_angle)
 
-#segmenta(right_knee_angle, rightciclos, 'medknee_angle.npy', 3)
-#plot(right_knee_angle,"angulo do joelho direito", 3)
-#np.save('right_knee_angle', right_knee_angle)
+segmenta(right_knee_angle, rightciclos, 'medknee_angle.npy', 3)
+plot(right_knee_angle,"angulo do joelho direito", 3)
 
-#segmenta(right_hip_angle, rightciclos, 'medhip_angle.npy', 4)
-#plot(right_hip_angle,"angulo do quadril direito", 4)
-#np.save('right_hip_angle', right_hip_angle)
+segmenta(right_hip_angle, rightciclos, 'medhip_angle.npy', 4)
+plot(right_hip_angle,"angulo do quadril direito", 4)
 
-#segmenta(right_ankle_angle, rightciclos, 'medankle_angle.npy', 5)
-#plot(right_ankle_angle,"angulo do tornozelo direito", 5)
-#np.save('right_ankle_angle', right_ankle_angle)
+segmenta(right_ankle_angle, rightciclos, 'medankle_angle.npy', 5)
+plot(right_ankle_angle,"angulo do tornozelo direito", 5)
