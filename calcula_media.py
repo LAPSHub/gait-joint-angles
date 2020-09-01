@@ -8,20 +8,13 @@ path = './angles/'
 
 
 def medias(string):
-    a = []
-
-
     a_t = []
     med = []
     s = []
     std = []
     data_files = [files for files in sorted(os.listdir(path)) if files.endswith(string)]
     for index, af in enumerate(data_files):
-        f = np.load(os.path.join(path, af), 'r')
-        # inserindo os dados numa lista temporaria
-        a.insert(index, f)
-        # transpondo a lista temp
-        a_t = list(map(list, zip(*a)))
+        a_t = np.load(os.path.join(path, af), 'r')
 
     # calculando as medias
     for i1 in range(len(list(a_t))):
@@ -81,26 +74,38 @@ def plot(data, string):
     plt.show()
 
 
-hip = medias('hip_angle.npy')
-knee = medias('knee_angle.npy')
-ankle = medias('ankle_angle.npy')
+left_hip = medias('left_hip_angles.npy')
+left_knee = medias('left_knee_angles.npy')
+left_ankle = medias('left_ankle_angles.npy')
+right_hip = medias('right_hip_angles.npy')
+right_knee = medias('right_knee_angles.npy')
+right_ankle = medias('right_ankle_angles.npy')
 #head = medias('_cabec.npy')
 
-hip_med = hip[0]
-knee_med = knee[0]
-ankle_med = ankle[0]
+left_hip_med = left_hip[0]
+left_knee_med = left_knee[0]
+left_ankle_med = left_ankle[0]
+right_hip_med = right_hip[0]
+right_knee_med = right_knee[0]
+right_ankle_med = right_ankle[0]
 #head_med = head[0]
 
-hip_std = hip[1]
-knee_std = knee[1]
-ankle_std = ankle[1]
+left_hip_std = left_hip[1]
+left_knee_std = left_knee[1]
+left_ankle_std = left_ankle[1]
+right_hip_std = right_hip[1]
+right_knee_std = right_knee[1]
+right_ankle_std = right_ankle[1]
 #head_std = head[1]
 
-plot(hip_med, "quadril medio")
-plot(knee_med, "joelho medio")
-plot(ankle_med, "tornozelo medio")
+plot(left_hip_med, "quadril esquerdo medio")
+plot(left_knee_med, "joelho esquerdo medio")
+plot(left_ankle_med, "tornozelo esquerdo medio")
+plot(right_hip_med, "quadril direito medio")
+plot(right_knee_med, "joelho direito medio")
+plot(right_ankle_med, "tornozelo direito medio")
 #plot(head_med, "posicao da cabeca")
 
-np.save('medhip_angle', hip_med)
-np.save('medknee_angle', knee_med)
-np.save('medankle_angle', ankle_med)
+#np.save('medhip_angle', hip_med)
+#np.save('medknee_angle', knee_med)
+#np.save('medankle_angle', ankle_med)
