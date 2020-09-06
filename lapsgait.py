@@ -400,3 +400,105 @@ def segment(joint_angles: dict) -> dict :
     #plot(right_ankle_angle,"angulo do tornozelo direito", 5)
 
     return segmented_angles
+
+def segments2matrix(segs: list, method: str = 'zeros' ) -> np.array :
+    """ Todo
+
+    Parameters
+    ----------
+    segs: list
+        Todo
+
+    method: string
+        Todo
+
+    Returns
+    -------
+    matrix_of_segments: array
+        Todo
+    """
+
+    # converte arrays em lista de listas
+    lst_arrays = []
+    # calcula o tamanho do maior segmento
+    max_length = 0
+    for item in segs:
+        if len(item) > max_length:
+            max_length = len(item)
+        lst_arrays.append(list(item))
+
+    # vefifica o método (por enquanto, preenche de zeros)
+    if method == 'zeros':
+        for item in lst_arrays:
+            #print(item)
+            if len(item) < max_length:
+                diff = max_length - len(item)
+                for new in range(diff):
+                    item.append(0)
+
+    matrix_of_segments = np.array(segs)
+    print( matrix_of_segments.shape)
+    
+    return matrix_of_segments
+
+def average( segments: dict ) -> dict: #old medias  
+    """ Calculate the average of joint angle segments
+
+    Parameters
+    ----------
+    segments: dict
+        Dictionary of lists containing segments of a joint angle signals
+
+    Returns
+    -------
+    avg_signal: dictionaty of list
+        A dictionary of lists with the average of the input segments
+    """
+
+    avg_signal = {} 
+    for joint_angle in segments:
+        # converte segments[joint_angle] em matriz
+        seg_matrix = segments2matrix(segments[joint_angle])
+        # calcula a média 
+        avg_signal[joint_angle] = np.mean(seg_matrix)
+
+    print(avg_signal)
+
+    #a = []
+
+
+    #a_t = []
+    #med = []
+    #s = []
+    #std = []
+    #data_files = [files for files in sorted(os.listdir(path)) if files.endswith(string)]
+    #for index, af in enumerate(data_files):
+    #    f = np.load(os.path.join(path, af), 'r')
+    #    # inserindo os dados numa lista temporaria
+    #    a.insert(index, f)
+    #    # transpondo a lista temp
+    #    a_t = list(map(list, zip(*a)))
+
+    ## calculando as medias
+    #for i1 in range(len(list(a_t))):
+    #    i = []
+    #    for i2 in range(len(list(a_t[i1]))):
+    #        i.insert(i1, a_t[i1][i2])
+    #        media = np.mean(i)
+    #    # inserindo as medias numa lista nova
+    #    med.insert(i1, media)
+
+    #for i1 in range(len(list(a_t))):
+    #    for i2 in range(len(list(a_t[i1]))):
+    #        a1 = a_t[i1][i2] - med[i2]
+    #        a1 = math.pow(a1, 2)
+    #        s.insert(i1, a1)
+    #    b = len(s)
+    #    s = sum(s)
+    #    s = s / b
+    #    s = math.sqrt(s)
+    #    std.insert(i1, s)
+    #    s = []
+    return 0 #(med, std)
+
+

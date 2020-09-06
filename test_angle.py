@@ -12,12 +12,15 @@ anatomical_points, joint_angles = lg.read_data(path_to_json) # implemented, need
 # signal segmentation
 segmented_angles =  lg.segment(joint_angles)
 
+# average signals
+averaged_sinals = lg.average(segmented_angles)
+
 # ploting joint angles
 plt.figure(1)
 plt.plot(joint_angles['left_hip'], 'r')
 plt.grid(True)
 
-# ploting segmentes joint angles
+# ploting segmented joint angles
 plt.figure(2)
 plt.hold(True)
 plt.grid(True)
