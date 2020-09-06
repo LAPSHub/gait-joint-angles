@@ -85,36 +85,69 @@ def detecta_segmento(data):
         if a != 0 and grad[index] < 0:
             indexes.insert(index, a + 1)
             a = 0
-    print(len(indexes) - 1)
+    #print(len(indexes) - 1)
     return indexes
 
-def segmenta(data, indexes, string, n):
-    """ Funcao que pega os dados dos angulos e da segmentacao para retornar as 
-    listas segmentadas
-    """
+def segmenta(data: list, indexes: list) -> list: #, string, n):
+    """ Segment complete joint angle signals according to gait cycles. 
 
+    Parameters
+    ----------
+    data : list
+        Joint angle signal
+
+    indexes: list
+        Indexes indicating the gait cycles limits in data
+
+    Returns
+    -------
+    segments: dict
+        a list of lists containing the segments of joint angles
+    """
+    
+    segments = []
     for index, js in enumerate(indexes[:-1]):
         start = indexes[index]
         finish = indexes[index + 1]
-        print(start, finish)
+        #print(start, finish)
         segdata = data[start:finish]
 
-        # -- inserção feita pelo Clebson
-        #Necessário criar pasta angles no diretório
-        #Direciona uma pasta de destino para salvar os arquivos: Medankle_angle.npy,
-        # medhip_angle.npy e medknee_angle.npy.
-        path_name = './angles/' + str(n) + '_' + string
-        np.save(path_name, segdata)
-        # -- fim da inserção
-        
-        x = list(range(start, finish))
-        plt.title('segmentos de um ciclo')
-        plt.plot(x, segdata, 'r')
-        plt.xlabel('frames')
-        plt.show()
+        segments.append(segdata)
+        # bloco comentado por rfz
+        ## -- inserção feita pelo Clebson
+        ##Necessário criar pasta angles no diretório
+        ##Direciona uma pasta de destino para salvar os arquivos: Medankle_angle.npy,
+        ## medhip_angle.npy e medknee_angle.npy.
+        #path_name = './angles/' + str(n) + '_' + string
+        #np.save(path_name, segdata)
+        ## -- fim da inserção
+        # 
+        #x = list(range(start, finish))
+        #plt.title('segmentos de um ciclo')
+        #plt.plot(x, segdata, 'r')
+        #plt.xlabel('frames')
+        #plt.show()
+        # fim de bloco comentado por rfz
 
-def plot(data, string, n):
-    """ Função para plotagem
+    return segments
+
+
+
+def plot(data, string, n): # is this function really necessary ?
+    """ Plot data.
+
+    Parameters
+    ----------
+    data : ???
+        The file location of the data file
+    string: str
+        Description
+    n: ???
+        Description
+
+    Returns
+    -------
+        0
     """
 
     x = range(len(data))
@@ -126,7 +159,9 @@ def plot(data, string, n):
     plt.ylabel('extension<-angle(degrees)->flexion')
     plt.show()
 
-def read_data( path_to_data_files: string ) -> list:
+    return 0
+
+def read_data( path_to_data_files: str ) -> list:
     """ Read openpose data, and select anatomical points of interest for 
     futher analysis and processing.     
 
@@ -144,9 +179,8 @@ def read_data( path_to_data_files: string ) -> list:
         a dictionary of lists containing the calculated joit angles
     """
 
-    json_files = 
-        [pos_json for pos_json in sorted(os.listdir(path_to_data_files)) if 
-        pos_json.endswith('.json')]
+    json_files = [pos_json for pos_json in sorted(os.listdir(
+        path_to_data_files)) if pos_json.endswith('.json')]
 
     #inicializacao dos vetores que armazenam dados importantes
     head_pos = []
@@ -161,7 +195,7 @@ def read_data( path_to_data_files: string ) -> list:
 
     #leitura dos dados na pasta selecionada
     for index,js in enumerate(json_files):
-        f = open(os.path.join(path_to_json,js),'r')
+        f = open(os.path.join(path_to_data_files,js),'r')
         data = f.read()
         jsondata=json.loads(data)
         
@@ -213,7 +247,7 @@ def read_data( path_to_data_files: string ) -> list:
         right_hip_y = jsondata["part_candidates"][0]["9"][1] \
             if len(jsondata["part_candidates"][0]["9"]) > 1 else 0
     
-        right_knee_x = jsondata["part_candidates"][0]["10"][0] \ 
+        right_knee_x = jsondata["part_candidates"][0]["10"][0] \
             if len(jsondata["part_candidates"][0]["10"]) > 1 else 0
         right_knee_y = jsondata["part_candidates"][0]["10"][1] \
             if len(jsondata["part_candidates"][0]["10"]) > 1 else 0
@@ -225,10 +259,10 @@ def read_data( path_to_data_files: string ) -> list:
 
         right_toe_x = jsondata["part_candidates"][0]["22"][0] \
             if len(jsondata["part_candidates"][0]["22"]) > 1 else 0
-        right_toe_y = jsondata["part_candidates"][0]["22"][1] \	
+        right_toe_y = jsondata["part_candidates"][0]["22"][1] \
             if len(jsondata["part_candidates"][0]["22"]) > 1 else 0
 
-        right_heel_x = jsondata["part_candidates"][0]["24"][0] \ 
+        right_heel_x = jsondata["part_candidates"][0]["24"][0] \
             if len(jsondata["part_candidates"][0]["24"]) > 1 else 0
         right_heel_y = jsondata["part_candidates"][0]["24"][1] \
             if len(jsondata["part_candidates"][0]["24"]) > 1 else 0
@@ -281,7 +315,8 @@ def read_data( path_to_data_files: string ) -> list:
 
     head_pos=  scipy.ndimage.gaussian_filter(head_pos,sigma = 2)
 
-    # função implementa um filtro gaussiano 1-D. O desvio padrão do filtro gaussiano é passado pelo parâmetro sigma
+    # função implementa um filtro gaussiano 1-D. O desvio padrão do filtro 
+    # gaussiano é passado pelo parâmetro sigma
     left_knee_angle = scipy.ndimage.gaussian_filter(left_knee_angle, sigma=3)
     left_hip_angle = scipy.ndimage.gaussian_filter(left_hip_angle, sigma=5)
     left_ankle_angle = scipy.ndimage.gaussian_filter(left_ankle_angle, sigma=5)
@@ -305,6 +340,7 @@ def read_data( path_to_data_files: string ) -> list:
     anatomical_points['right_foot'] = right_foot
     anatomical_points['right_heel'] = right_heel
 
+    joint_angles = {}
     joint_angles['head'] = head_pos 
     joint_angles['left_knee'] = left_knee_angle 
     joint_angles['left_hip'] = left_hip_angle 
@@ -330,24 +366,37 @@ def segment(joint_angles: dict) -> dict :
     segmented_angles: dict
         A dictionary of lists containing segmented joint angles
     """
+    # Este trecho foi colocado para criar o módulo mais rapidamente
+    # Substituir por estratégias mais eficientes em versões futuras
+    head_pos = joint_angles['head']
+    left_knee_angle = joint_angles['left_knee']
+    left_hip_angle = joint_angles['left_hip']  
+    left_ankle_angle = joint_angles['left_ankle']  
+    right_knee_angle = joint_angles['right_knee']  
+    right_hip_angle = joint_angles['right_hip']  
+    right_ankle_angle = joint_angles['right_ankle']
+    
     
     leftciclos = detecta_segmento(left_hip_angle)
     rightciclos = detecta_segmento(right_hip_angle)
 
-    segmenta(left_knee_angle, leftciclos, 'medknee_angle.npy', 0)
-    plot(left_knee_angle, "angulo do joelho esquerdo", 0)
+    segmented_angles = {}
+    segmented_angles['left_knee'] = segmenta(left_knee_angle, leftciclos)
+    #plot(left_knee_angle, "angulo do joelho esquerdo", 0)
 
-    segmenta(left_hip_angle, leftciclos, 'medhip_angle.npy', 1)
-    plot(left_hip_angle, "angulo do quadril esquerdo", 1)
+    segmented_angles['left_hip'] = segmenta(left_hip_angle, leftciclos)
+    #plot(left_hip_angle, "angulo do quadril esquerdo", 1)
 
-    segmenta(left_ankle_angle, leftciclos, 'medankle_angle.npy', 2)
-    plot(left_ankle_angle, "angulo do tornozelo esquerdo", 2)
+    segmented_angles['left_ankle'] = segmenta(left_ankle_angle, leftciclos)
+    #plot(left_ankle_angle, "angulo do tornozelo esquerdo", 2)
 
-    segmenta(right_knee_angle, rightciclos, 'medknee_angle.npy', 3)
-    plot(right_knee_angle,"angulo do joelho direito", 3)
+    segmented_angles['right_knee'] = segmenta(right_knee_angle, rightciclos)
+    #plot(right_knee_angle,"angulo do joelho direito", 3)
 
-    segmenta(right_hip_angle, rightciclos, 'medhip_angle.npy', 4)
-    plot(right_hip_angle,"angulo do quadril direito", 4)
+    segmented_angles['right_hip'] = segmenta(right_hip_angle, rightciclos)
+    #plot(right_hip_angle,"angulo do quadril direito", 4)
 
-    segmenta(right_ankle_angle, rightciclos, 'medankle_angle.npy', 5)
-    plot(right_ankle_angle,"angulo do tornozelo direito", 5)
+    segmented_angles['right_ankle'] = segmenta(right_ankle_angle, rightciclos)
+    #plot(right_ankle_angle,"angulo do tornozelo direito", 5)
+
+    return segmented_angles
