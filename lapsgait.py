@@ -8,7 +8,7 @@ import numpy as np
 import scipy.ndimage
 
 def get_angle(superior,central,inferior,qual_parte):
-    """ Funcao para calcular angulos:
+    """ Calculate angles:
     
      		   a (ax,ay)
                                       
@@ -21,9 +21,10 @@ def get_angle(superior,central,inferior,qual_parte):
              -------- c(cx,cy)
  		  bc
          	               ba.bc
-	         @ = arccos(-----------) -> produto escalar de dois vetores
+	         @ = arccos(-----------) -> dot product of two vectors
 			     |ba|*|bx|
     """
+    #todo: translate variable names to english
 
     if superior[0] == 0 or superior[1]==0 or central[0] == 0 or central[1]==0 or inferior[0]==0 or inferior[1] == 0:
         angulo = 0
@@ -71,8 +72,19 @@ def get_angle(superior,central,inferior,qual_parte):
     return angulo
 
 def detecta_segmento(data):
-    """ Funcao que pega os dados dos angulos e tenta segmenta-los por meio de 
-    relacoes de derivadas, ele retorna os indices para inicio/fim de cada ciclo
+    """ Find begining and ending points of gait cycles in  angle signals 
+    by using derivatives. 
+
+    Parameters
+    ----------
+    data : list or array
+        Joint angle signal
+
+    Returns
+    -------
+    indexes: list
+        Indexes indicating the gait cycles limits in data
+ 
     """
 
     a = 0
@@ -85,7 +97,7 @@ def detecta_segmento(data):
         if a != 0 and grad[index] < 0:
             indexes.insert(index, a + 1)
             a = 0
-    #print(len(indexes) - 1)
+
     return indexes
 
 def segmenta(data: list, indexes: list) -> list: #, string, n):
@@ -102,17 +114,19 @@ def segmenta(data: list, indexes: list) -> list: #, string, n):
     Returns
     -------
     segments: dict
-        a list of lists containing the segments of joint angles
+        A dictionary of lists containing the segments of joint angles
     """
     
     segments = []
     for index, js in enumerate(indexes[:-1]):
         start = indexes[index]
         finish = indexes[index + 1]
-        #print(start, finish)
         segdata = data[start:finish]
 
         segments.append(segdata)
+        # sugestão: eliminar todo o bloco
+        # justificativa: não há necessidade de armazenar os segmentos !
+        #
         # bloco comentado por rfz
         ## -- inserção feita pelo Clebson
         ##Necessário criar pasta angles no diretório
@@ -176,12 +190,13 @@ def read_data( path_to_data_files: str ) -> list:
         a dictionary of lists containing the selected anatomical points
     
     joint_angles: dict
-        a dictionary of lists containing the calculated joit angles
+        a dictionary of arrays containing the calculated joit angles
     """
 
     json_files = [pos_json for pos_json in sorted(os.listdir(
         path_to_data_files)) if pos_json.endswith('.json')]
 
+    # --- rfz: traduzir comentários
     #inicializacao dos vetores que armazenam dados importantes
     head_pos = []
     
@@ -194,6 +209,7 @@ def read_data( path_to_data_files: str ) -> list:
     right_ankle_angle = []
 
     #leitura dos dados na pasta selecionada
+    # --- rfz: deve haver uma maneira mais fácil de fazer ---
     for index,js in enumerate(json_files):
         f = open(os.path.join(path_to_data_files,js),'r')
         data = f.read()
@@ -308,6 +324,7 @@ def read_data( path_to_data_files: str ) -> list:
         raa = 90 - get_angle(right_knee, right_ankle, right_foot, 'tornozelo')
         right_ankle_angle.insert(index, raa)
 
+    # rfz: Por que é feita uma filtragem aqui? Como são determinados os sigmas?
     left_knee_angle  = scipy.ndimage.gaussian_filter(left_knee_angle,sigma = 3)
     left_hip_angle   = scipy.ndimage.gaussian_filter(left_hip_angle,sigma = 5)
     left_ankle_angle = scipy.ndimage.gaussian_filter(left_ankle_angle,sigma = 5)
@@ -317,6 +334,7 @@ def read_data( path_to_data_files: str ) -> list:
 
     # função implementa um filtro gaussiano 1-D. O desvio padrão do filtro 
     # gaussiano é passado pelo parâmetro sigma
+    # rfz: esses sinais já foram filtrados acima. Por que a nova filtragem?
     left_knee_angle = scipy.ndimage.gaussian_filter(left_knee_angle, sigma=3)
     left_hip_angle = scipy.ndimage.gaussian_filter(left_hip_angle, sigma=5)
     left_ankle_angle = scipy.ndimage.gaussian_filter(left_ankle_angle, sigma=5)
@@ -402,20 +420,21 @@ def segment(joint_angles: dict) -> dict :
     return segmented_angles
 
 def segments2matrix(segs: list, method: str = 'zeros' ) -> np.array :
-    """ Todo
+    """ Convert a colection of joint segments into a single matrix.
 
     Parameters
     ----------
     segs: list
-        Todo
+        List of arrays, each one of which containing a joint signal segment
 
     method: string
-        Todo
+        Method used to reshape smaller segments (default=zeros: smaller 
+        signals are simply filled with zeros)
 
     Returns
     -------
     matrix_of_segments: array
-        Todo
+        Matrix with all segments reshaped. Each line contains a segment.
     """
 
     # converte arrays em lista de listas
@@ -445,68 +464,30 @@ def segments2matrix(segs: list, method: str = 'zeros' ) -> np.array :
     return matrix_of_segments
 
 def stats( segments: dict ) -> dict: #old medias  
-    """ Calculate the average of joint angle segments
+    """ Calculate the average and the standard deviation of joint 
+        angle segments.
 
     Parameters
     ----------
-    segments: dict
-        Dictionary of lists containing segments of a joint angle signals
+    segments: array
+        Matrix containing segments (each line) of a joint angle signals
 
     Returns
     -------
     avg_signal: dictionaty of list
         A dictionary of lists with the average of the input segments
+
+    std_signal: dictionaty of list
+        A dictionary of lists with the standard deviation of the input segments
     """
 
     avg_signal = {} 
     std_signal = {}
     for joint_angle in segments:
-        # converte segments[joint_angle] em matriz
+        # convert segments[joint_angle] into matrix
         seg_matrix = segments2matrix(segments[joint_angle])
-        #print('segments of ', joint_angle, ': ', segments[joint_angle])
-        #print('matrix: ', seg_matrix)
-        #print('matrix shape: ', seg_matrix.shape)
-        # calcula a média 
+        # calculate average and standard deviation 
         avg_signal[joint_angle] = np.mean(seg_matrix, axis = 0)
         std_signal[joint_angle] = np.std(seg_matrix, axis = 0)
 
-    #print(avg_signal)
-
-    #a = []
-
-
-    #a_t = []
-    #med = []
-    #s = []
-    #std = []
-    #data_files = [files for files in sorted(os.listdir(path)) if files.endswith(string)]
-    #for index, af in enumerate(data_files):
-    #    f = np.load(os.path.join(path, af), 'r')
-    #    # inserindo os dados numa lista temporaria
-    #    a.insert(index, f)
-    #    # transpondo a lista temp
-    #    a_t = list(map(list, zip(*a)))
-
-    ## calculando as medias
-    #for i1 in range(len(list(a_t))):
-    #    i = []
-    #    for i2 in range(len(list(a_t[i1]))):
-    #        i.insert(i1, a_t[i1][i2])
-    #        media = np.mean(i)
-    #    # inserindo as medias numa lista nova
-    #    med.insert(i1, media)
-
-    #for i1 in range(len(list(a_t))):
-    #    for i2 in range(len(list(a_t[i1]))):
-    #        a1 = a_t[i1][i2] - med[i2]
-    #        a1 = math.pow(a1, 2)
-    #        s.insert(i1, a1)
-    #    b = len(s)
-    #    s = sum(s)
-    #    s = s / b
-    #    s = math.sqrt(s)
-    #    std.insert(i1, s)
-    #    s = []
     return avg_signal, std_signal
-
-
