@@ -26,7 +26,7 @@ import scipy.ndimage
 #------------------------------------------------------------------------------------
 #a seguinte funcao pega 3 pontos p(x,y),o primeiro corresponde ao membro mais alto,o segundo e o medio e o terceiro o mais baixo
 def get_angle(superior,central,inferior,qual_parte):
-    if superior[0] == 0 or superior[1]==0 or central[0] == 0 or central[1]==0 or inferior[0]==0 or inferior[1] == 0:
+    if superior[0] == 0 or superior[1] == 0 or central[0] == 0 or central[1] == 0 or inferior[0] == 0 or inferior[1] == 0:
         angulo = 0
     else:
         v1 = superior - central
@@ -47,7 +47,7 @@ def get_angle(superior,central,inferior,qual_parte):
         if qual_parte == 'quadril':
             referencia = (-v1/np.linalg.norm(v1))*np.linalg.norm(v2)
 
-            #prod_vetorial não é usado por se tratar de aplicação em 2d
+            # prod_vetorial não é usado por se tratar de aplicação em 2d
             #prod_vetorial = np.linalg.norm(np.cross(v1,v2))/(np.linalg.norm(v1)*np.linalg.norm(v2))
             prod_escalar = np.arccos(np.dot(v1, v2) / (np.linalg.norm(v1) * np.linalg.norm(v2)))
 
@@ -55,14 +55,14 @@ def get_angle(superior,central,inferior,qual_parte):
                 angulo = np.rad2deg(prod_escalar - np.pi)
 
             else:
-                angulo =  np.rad2deg(math.pi - prod_escalar)
+                angulo = np.rad2deg(math.pi - prod_escalar)
 
         if qual_parte == 'tornozelo':
             referencia = v1[1],-v1[0]
             referencia = (referencia/np.linalg.norm(v1))*np.linalg.norm(v2)
 
             # prod_vetorial não é usado por se tratar de aplicação em 2d
-            prod_vetorial = np.linalg.norm(np.cross(referencia,v2))/(np.linalg.norm(referencia)*np.linalg.norm(v2))
+            #prod_vetorial = np.linalg.norm(np.cross(referencia,v2))/(np.linalg.norm(referencia)*np.linalg.norm(v2))
             prod_escalar = np.arccos(np.dot(referencia, v2) / (np.linalg.norm(referencia) * np.linalg.norm(v2)))
 
             if v2[1]<referencia[1]:
@@ -90,6 +90,7 @@ def detecta_segmento(data):
 # ------------------------------------------------------------------------------------
 # funcao que pega os dados dos angulos e da segmentacao para retornar as listas segmentadas
 def segmenta(data, indexes, string, n):
+    arrayT = []
     for index, js in enumerate(indexes[:-1]):
         start = indexes[index]
         finish = indexes[index + 1]
@@ -98,11 +99,13 @@ def segmenta(data, indexes, string, n):
 
         # -- inserção feita pelo Clebson
         #Necessário criar pasta angles no diretório
-        #Direciona uma pasta de destino para salvar os arquivos: Medankle_angle.npy, medhip_angle.npy e medknee_angle.npy.
-        path_name = './angles/' + str(n) + '_' + string
-        np.save(path_name, segdata)
+        #Direciona uma pasta de destino para salvar os arquivos
+        path_name = './angles/' + string
+        arrayT.append(segdata)
+        a_t = list(map(list, zip(*arrayT)))
+        np.save(path_name, a_t)
         # -- fim da inserção
-        
+
         x = list(range(start, finish))
         plt.title('segmentos de um ciclo')
         plt.plot(x, segdata, 'r')
@@ -167,7 +170,7 @@ for index,js in enumerate(json_files):
     left_knee_y = jsondata["part_candidates"][0]["13"][1] if len(jsondata["part_candidates"][0]["13"]) > 1 else 0
 
     left_ankle_x = jsondata["part_candidates"][0]["14"][0] if len(jsondata["part_candidates"][0]["14"]) > 1 else 0
-    left_ankle_y = jsondata["part_candidates"][0]["14"][1]if len(jsondata["part_candidates"][0]["14"]) > 1 else 0
+    left_ankle_y = jsondata["part_candidates"][0]["14"][1] if len(jsondata["part_candidates"][0]["14"]) > 1 else 0
 
     left_toe_x = jsondata["part_candidates"][0]["20"][0] if len(jsondata["part_candidates"][0]["20"]) > 1 else 0
     left_toe_y = jsondata["part_candidates"][0]["20"][1] if len(jsondata["part_candidates"][0]["20"]) > 1 else 0
@@ -178,15 +181,15 @@ for index,js in enumerate(json_files):
     #parte direita
     right_hip_x = jsondata["part_candidates"][0]["9"][0] if len(jsondata["part_candidates"][0]["9"]) > 1 else 0
     right_hip_y = jsondata["part_candidates"][0]["9"][1] if len(jsondata["part_candidates"][0]["9"]) > 1 else 0
-    
+
     right_knee_x = jsondata["part_candidates"][0]["10"][0] if len(jsondata["part_candidates"][0]["10"]) > 1 else 0
     right_knee_y = jsondata["part_candidates"][0]["10"][1] if len(jsondata["part_candidates"][0]["10"]) > 1 else 0
 
     right_ankle_x = jsondata["part_candidates"][0]["11"][0] if len(jsondata["part_candidates"][0]["11"]) > 1 else 0
     right_ankle_y = jsondata["part_candidates"][0]["11"][1] if len(jsondata["part_candidates"][0]["11"]) > 1 else 0
 
-    right_toe_x = jsondata["part_candidates"][0]["22"][0]	if len(jsondata["part_candidates"][0]["22"]) > 1 else 0
-    right_toe_y = jsondata["part_candidates"][0]["22"][1]	if len(jsondata["part_candidates"][0]["22"]) > 1 else 0
+    right_toe_x = jsondata["part_candidates"][0]["22"][0] if len(jsondata["part_candidates"][0]["22"]) > 1 else 0
+    right_toe_y = jsondata["part_candidates"][0]["22"][1] if len(jsondata["part_candidates"][0]["22"]) > 1 else 0
 
     right_heel_x = jsondata["part_candidates"][0]["24"][0] if len(jsondata["part_candidates"][0]["24"]) > 1 else 0
     right_heel_y = jsondata["part_candidates"][0]["24"][1] if len(jsondata["part_candidates"][0]["24"]) > 1 else 0
@@ -219,26 +222,16 @@ for index,js in enumerate(json_files):
     laa = get_angle(left_knee,left_ankle,left_foot,'tornozelo')
     left_ankle_angle.insert(index,laa)
 
-    #rka = 180 - get_angle(right_hip,right_knee,right_ankle)
-    #right_knee_angle.insert(index,rka)
-
     head_pos.insert(index,head[1])
 
-    rha = 180 - get_angle(trunk, right_hip, right_knee, 'quadril')
-    right_hip_angle.insert(index, rha)
+    rha = 180 - get_angle(trunk,right_hip,right_knee,'quadril')
+    right_hip_angle.insert(index,rha)
 
-    rka = 180 - get_angle(right_hip, right_knee, right_ankle, 'joelho')
-    right_knee_angle.insert(index, rka)
+    rka = 180 - get_angle(right_hip,right_knee,right_ankle,'joelho')
+    right_knee_angle.insert(index,rka)
 
-    raa = 90 - get_angle(right_knee, right_ankle, right_foot, 'tornozelo')
-    right_ankle_angle.insert(index, raa)
-
-left_knee_angle =  scipy.ndimage.gaussian_filter(left_knee_angle,sigma = 3)
-left_hip_angle =  scipy.ndimage.gaussian_filter(left_hip_angle,sigma = 5)
-left_ankle_angle =  scipy.ndimage.gaussian_filter(left_ankle_angle,sigma = 5)
-
-
-head_pos=  scipy.ndimage.gaussian_filter(head_pos,sigma = 2)
+    raa = 90 - get_angle(right_knee,right_ankle,right_foot,'tornozelo')
+    right_ankle_angle.insert(index,raa)
 
 # função implementa um filtro gaussiano 1-D. O desvio padrão do filtro gaussiano é passado pelo parâmetro sigma
 left_knee_angle = scipy.ndimage.gaussian_filter(left_knee_angle, sigma=3)
@@ -249,24 +242,25 @@ right_knee_angle = scipy.ndimage.gaussian_filter(right_knee_angle, sigma=5)
 right_hip_angle = scipy.ndimage.gaussian_filter(right_hip_angle, sigma=5)
 right_ankle_angle = scipy.ndimage.gaussian_filter(right_ankle_angle, sigma=2)
 
+head_pos = scipy.ndimage.gaussian_filter(head_pos, sigma=2)
 
 leftciclos = detecta_segmento(left_hip_angle)
 rightciclos = detecta_segmento(right_hip_angle)
 
-segmenta(left_knee_angle, leftciclos, 'medknee_angle.npy', 0)
+segmenta(left_knee_angle, leftciclos, 'left_knee_angles.npy', 0)
 plot(left_knee_angle, "angulo do joelho esquerdo", 0)
 
-segmenta(left_hip_angle, leftciclos, 'medhip_angle.npy', 1)
+segmenta(left_hip_angle, leftciclos, 'left_hip_angles.npy', 1)
 plot(left_hip_angle, "angulo do quadril esquerdo", 1)
 
-segmenta(left_ankle_angle, leftciclos, 'medankle_angle.npy', 2)
+segmenta(left_ankle_angle, leftciclos, 'left_ankle_angles.npy', 2)
 plot(left_ankle_angle, "angulo do tornozelo esquerdo", 2)
 
-segmenta(right_knee_angle, rightciclos, 'medknee_angle.npy', 3)
-plot(right_knee_angle,"angulo do joelho direito", 3)
+segmenta(right_knee_angle, rightciclos, 'right_knee_angles.npy', 3)
+plot(right_knee_angle, "angulo do joelho direito", 3)
 
-segmenta(right_hip_angle, rightciclos, 'medhip_angle.npy', 4)
-plot(right_hip_angle,"angulo do quadril direito", 4)
+segmenta(right_hip_angle, rightciclos, 'right_hip_angles.npy', 4)
+plot(right_hip_angle, "angulo do quadril direito", 4)
 
-segmenta(right_ankle_angle, rightciclos, 'medankle_angle.npy', 5)
-plot(right_ankle_angle,"angulo do tornozelo direito", 5)
+segmenta(right_ankle_angle, rightciclos, 'right_ankle_angles.npy', 5)
+plot(right_ankle_angle, "angulo do tornozelo direito", 5)
