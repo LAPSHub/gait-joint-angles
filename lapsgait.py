@@ -427,6 +427,8 @@ def segments2matrix(segs: list, method: str = 'zeros' ) -> np.array :
             max_length = len(item)
         lst_arrays.append(list(item))
 
+    #print('Max length: ', max_length)
+
     # vefifica o método (por enquanto, preenche de zeros)
     if method == 'zeros':
         for item in lst_arrays:
@@ -435,13 +437,14 @@ def segments2matrix(segs: list, method: str = 'zeros' ) -> np.array :
                 diff = max_length - len(item)
                 for new in range(diff):
                     item.append(0)
+            #print(item)
 
-    matrix_of_segments = np.array(segs)
-    print( matrix_of_segments.shape)
+    matrix_of_segments = np.array(lst_arrays)
+    #print( matrix_of_segments.shape)
     
     return matrix_of_segments
 
-def average( segments: dict ) -> dict: #old medias  
+def stats( segments: dict ) -> dict: #old medias  
     """ Calculate the average of joint angle segments
 
     Parameters
@@ -456,13 +459,18 @@ def average( segments: dict ) -> dict: #old medias
     """
 
     avg_signal = {} 
+    std_signal = {}
     for joint_angle in segments:
         # converte segments[joint_angle] em matriz
         seg_matrix = segments2matrix(segments[joint_angle])
+        #print('segments of ', joint_angle, ': ', segments[joint_angle])
+        #print('matrix: ', seg_matrix)
+        #print('matrix shape: ', seg_matrix.shape)
         # calcula a média 
-        avg_signal[joint_angle] = np.mean(seg_matrix)
+        avg_signal[joint_angle] = np.mean(seg_matrix, axis = 0)
+        std_signal[joint_angle] = np.std(seg_matrix, axis = 0)
 
-    print(avg_signal)
+    #print(avg_signal)
 
     #a = []
 
@@ -499,6 +507,6 @@ def average( segments: dict ) -> dict: #old medias
     #    s = math.sqrt(s)
     #    std.insert(i1, s)
     #    s = []
-    return 0 #(med, std)
+    return avg_signal, std_signal
 
 
