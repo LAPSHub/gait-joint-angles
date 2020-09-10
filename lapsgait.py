@@ -1,17 +1,19 @@
 """ Module with classes and functions to analyse gait signals. """
 
 # load modules
-import os,json
+import os
+import json
 import math
 import matplotlib.pyplot as plt
 import numpy as np
 import scipy.ndimage
 
-def get_angle(superior,central,inferior,qual_parte):
+
+def get_angle(upper, central, lower, which_part):
     """ Calculate angles:
-    
-     		   a (ax,ay)
-                                      
+
+               a (ax,ay)
+
                   /
                  /
               ba/
@@ -19,61 +21,63 @@ def get_angle(superior,central,inferior,qual_parte):
               /
     b(bx,by) /)-> @
              -------- c(cx,cy)
- 		  bc
-         	               ba.bc
-	         @ = arccos(-----------) -> dot product of two vectors
-			     |ba|*|bx|
+          bc
+                           ba.bc
+             @ = arccos(-----------) -> dot product of two vectors
+                 |ba|*|bx|
     """
-    #todo: translate variable names to english
+    # todo: translate variable names to english
 
-    if superior[0] == 0 or superior[1]==0 or central[0] == 0 or central[1]==0 or inferior[0]==0 or inferior[1] == 0:
-        angulo = 0
+    if upper[0] == 0 or upper[1] == 0 or central[0] == 0 or central[1] == 0 or lower[0] == 0 or lower[
+        1] == 0:
+        angle = 0
     else:
-        v1 = superior - central
-        v2 = inferior - central
+        v1 = upper - central
+        v2 = lower - central
 
-        if qual_parte == 'joelho':
-            referencia = (-v1/np.linalg.norm(v1))*np.linalg.norm(v2)
+        if which_part == 'knee':
+            reference = (-v1 / np.linalg.norm(v1)) * np.linalg.norm(v2)
             # prod_vetorial não é usado por se tratar de aplicação em 2d
-            #prod_vetorial = np.linalg.norm(np.cross(v1,v2))/(np.linalg.norm(v1)*np.linalg.norm(v2))
-            prod_escalar = np.arccos(np.dot(v1, v2) / (np.linalg.norm(v1) * np.linalg.norm(v2)))
-            
-            if v2[1]>referencia[1]:
-                angulo = np.rad2deg(prod_escalar - np.pi)
+            # prod_vetorial = np.linalg.norm(np.cross(v1,v2))/(np.linalg.norm(v1)*np.linalg.norm(v2))
+            dot_product = np.arccos(np.dot(v1, v2) / (np.linalg.norm(v1) * np.linalg.norm(v2)))
+
+            if v2[1] > reference[1]:
+                angle = np.rad2deg(dot_product - np.pi)
 
             else:
-                angulo = np.rad2deg(math.pi - prod_escalar)
+                angle = np.rad2deg(math.pi - dot_product)
 
-        if qual_parte == 'quadril':
-            referencia = (-v1/np.linalg.norm(v1))*np.linalg.norm(v2)
-
-            #prod_vetorial não é usado por se tratar de aplicação em 2d
-            #prod_vetorial = np.linalg.norm(np.cross(v1,v2))/(np.linalg.norm(v1)*np.linalg.norm(v2))
-            prod_escalar = np.arccos(np.dot(v1, v2) / (np.linalg.norm(v1) * np.linalg.norm(v2)))
-
-            if v2[0]>referencia[0]:
-                angulo = np.rad2deg(prod_escalar - np.pi)
-
-            else:
-                angulo =  np.rad2deg(math.pi - prod_escalar)
-
-        if qual_parte == 'tornozelo':
-            referencia = v1[1],-v1[0]
-            referencia = (referencia/np.linalg.norm(v1))*np.linalg.norm(v2)
+        if which_part == 'hip':
+            reference = (-v1 / np.linalg.norm(v1)) * np.linalg.norm(v2)
 
             # prod_vetorial não é usado por se tratar de aplicação em 2d
-            prod_vetorial = np.linalg.norm(np.cross(referencia,v2))/(np.linalg.norm(referencia)*np.linalg.norm(v2))
-            prod_escalar = np.arccos(np.dot(referencia, v2) / (np.linalg.norm(referencia) * np.linalg.norm(v2)))
+            # prod_vetorial = np.linalg.norm(np.cross(v1,v2))/(np.linalg.norm(v1)*np.linalg.norm(v2))
+            dot_product = np.arccos(np.dot(v1, v2) / (np.linalg.norm(v1) * np.linalg.norm(v2)))
 
-            if v2[1]<referencia[1]:
-                angulo = -np.rad2deg(prod_escalar)
+            if v2[0] > reference[0]:
+                angle = np.rad2deg(dot_product - np.pi)
+
             else:
-                angulo = np.rad2deg(prod_escalar)
-    return angulo
+                angle = np.rad2deg(math.pi - dot_product)
 
-def detecta_segmento(data):
-    """ Find begining and ending points of gait cycles in  angle signals 
-    by using derivatives. 
+        if which_part == 'ankle':
+            reference = v1[1], -v1[0]
+            reference = (reference / np.linalg.norm(v1)) * np.linalg.norm(v2)
+
+            # prod_vetorial não é usado por se tratar de aplicação em 2d
+            # prod_vetorial = np.linalg.norm(np.cross(referencia, v2)) / (np.linalg.norm(referencia) * np.linalg.norm(v2))
+            dot_product = np.arccos(np.dot(reference, v2) / (np.linalg.norm(reference) * np.linalg.norm(v2)))
+
+            if v2[1] < reference[1]:
+                angle = -np.rad2deg(dot_product)
+            else:
+                angle = np.rad2deg(dot_product)
+    return angle
+
+
+def detect_segment(data):
+    """ Find begining and ending points of gait cycles in angle signals
+    by using derivatives.
 
     Parameters
     ----------
@@ -188,7 +192,7 @@ def read_data( path_to_data_files: str ) -> list:
     -------
     anatomical_points: dict
         a dictionary of lists containing the selected anatomical points
-    
+
     joint_angles: dict
         a dictionary of arrays containing the calculated joit angles
     """
@@ -199,7 +203,7 @@ def read_data( path_to_data_files: str ) -> list:
     # --- rfz: traduzir comentários
     #inicializacao dos vetores que armazenam dados importantes
     head_pos = []
-    
+
     left_hip_angle = []
     left_knee_angle = []
     left_ankle_angle = []
@@ -226,7 +230,7 @@ def read_data( path_to_data_files: str ) -> list:
         trunk_y = jsondata["part_candidates"][0]["1"][1] \
             if len(jsondata["part_candidates"][0]["1"]) > 1 else 0
 
-        mid_hip_x = jsondata["part_candidates"][0]["8"][0]\
+        mid_hip_x = jsondata["part_candidates"][0]["8"][0] \
             if len(jsondata["part_candidates"][0]["8"]) > 1 else 0
         mid_hip_y = jsondata["part_candidates"][0]["8"][1] \
             if len(jsondata["part_candidates"][0]["8"]) > 1 else 0
@@ -244,7 +248,7 @@ def read_data( path_to_data_files: str ) -> list:
 
         left_ankle_x = jsondata["part_candidates"][0]["14"][0] \
             if len(jsondata["part_candidates"][0]["14"]) > 1 else 0
-        left_ankle_y = jsondata["part_candidates"][0]["14"][1]\
+        left_ankle_y = jsondata["part_candidates"][0]["14"][1] \
             if len(jsondata["part_candidates"][0]["14"]) > 1 else 0
 
         left_toe_x = jsondata["part_candidates"][0]["20"][0] \
@@ -262,7 +266,7 @@ def read_data( path_to_data_files: str ) -> list:
             if len(jsondata["part_candidates"][0]["9"]) > 1 else 0
         right_hip_y = jsondata["part_candidates"][0]["9"][1] \
             if len(jsondata["part_candidates"][0]["9"]) > 1 else 0
-    
+
         right_knee_x = jsondata["part_candidates"][0]["10"][0] \
             if len(jsondata["part_candidates"][0]["10"]) > 1 else 0
         right_knee_y = jsondata["part_candidates"][0]["10"][1] \
@@ -300,48 +304,40 @@ def read_data( path_to_data_files: str ) -> list:
         right_foot = np.array([right_toe_x,right_toe_y])
         right_heel = np.array([right_heel_x,right_heel_y])
 
-        #calculam-se os angulos
-        lha = get_angle(trunk,mid_hip,left_knee,'quadril')
-        left_hip_angle.insert(index,lha)
+        # calculam-se os angulos
+        lha = get_angle(trunk, mid_hip, left_knee, 'hip')
+        left_hip_angle.insert(index, lha)
 
-        lka = get_angle(left_hip,left_knee,left_ankle,'joelho')
-        left_knee_angle.insert(index,lka)
+        lka = get_angle(left_hip, left_knee, left_ankle, 'knee')
+        left_knee_angle.insert(index, lka)
 
-        laa = get_angle(left_knee,left_ankle,left_foot,'tornozelo')
-        left_ankle_angle.insert(index,laa)
+        laa = get_angle(left_knee, left_ankle, left_foot, 'ankle')
+        left_ankle_angle.insert(index, laa)
 
-        #rka = 180 - get_angle(right_hip,right_knee,right_ankle)
-        #right_knee_angle.insert(index,rka)
+        head_pos.insert(index, head[1])
 
-        head_pos.insert(index,head[1])
-
-        rha = 180 - get_angle(trunk, right_hip, right_knee, 'quadril')
+        rha = 180 - get_angle(trunk, right_hip, right_knee, 'hip')
         right_hip_angle.insert(index, rha)
 
-        rka = 180 - get_angle(right_hip, right_knee, right_ankle, 'joelho')
+        rka = 180 - get_angle(right_hip, right_knee, right_ankle, 'knee')
         right_knee_angle.insert(index, rka)
 
-        raa = 90 - get_angle(right_knee, right_ankle, right_foot, 'tornozelo')
+        raa = 90 - get_angle(right_knee, right_ankle, right_foot, 'ankle')
         right_ankle_angle.insert(index, raa)
 
+
+    # função implementa um filtro gaussiano 1-D. O desvio padrão do filtro
+    # gaussiano é passado pelo parâmetro sigma]
     # rfz: Por que é feita uma filtragem aqui? Como são determinados os sigmas?
-    left_knee_angle  = scipy.ndimage.gaussian_filter(left_knee_angle,sigma = 3)
-    left_hip_angle   = scipy.ndimage.gaussian_filter(left_hip_angle,sigma = 5)
-    left_ankle_angle = scipy.ndimage.gaussian_filter(left_ankle_angle,sigma = 5)
+    head_pos = scipy.ndimage.gaussian_filter(head_pos, sigma=2)
 
-
-    head_pos=  scipy.ndimage.gaussian_filter(head_pos,sigma = 2)
-
-    # função implementa um filtro gaussiano 1-D. O desvio padrão do filtro 
-    # gaussiano é passado pelo parâmetro sigma
-    # rfz: esses sinais já foram filtrados acima. Por que a nova filtragem?
     left_knee_angle = scipy.ndimage.gaussian_filter(left_knee_angle, sigma=3)
     left_hip_angle = scipy.ndimage.gaussian_filter(left_hip_angle, sigma=5)
     left_ankle_angle = scipy.ndimage.gaussian_filter(left_ankle_angle, sigma=5)
 
     right_knee_angle  = scipy.ndimage.gaussian_filter(right_knee_angle, sigma=5)
     right_hip_angle   = scipy.ndimage.gaussian_filter(right_hip_angle, sigma=5)
-    right_ankle_angle = scipy.ndimage.gaussian_filter(right_ankle_angle,sigma=2)
+    right_ankle_angle = scipy.ndimage.gaussian_filter(right_ankle_angle, sigma=2)
 
     anatomical_points = {}
     anatomical_points['head'] = head
@@ -393,29 +389,28 @@ def segment(joint_angles: dict) -> dict :
     right_knee_angle = joint_angles['right_knee']  
     right_hip_angle = joint_angles['right_hip']  
     right_ankle_angle = joint_angles['right_ankle']
-    
-    
-    leftciclos = detecta_segmento(left_hip_angle)
-    rightciclos = detecta_segmento(right_hip_angle)
+
+    leftcycles = detect_segment(left_hip_angle)
+    rightcycles = detect_segment(right_hip_angle)
 
     segmented_angles = {}
-    segmented_angles['left_knee'] = segmenta(left_knee_angle, leftciclos)
-    #plot(left_knee_angle, "angulo do joelho esquerdo", 0)
+    segmented_angles['left_knee'] = segment(left_knee_angle, leftcycles)
+    # plot(left_knee_angle, "angulo do joelho esquerdo", 0)
 
-    segmented_angles['left_hip'] = segmenta(left_hip_angle, leftciclos)
-    #plot(left_hip_angle, "angulo do quadril esquerdo", 1)
+    segmented_angles['left_hip'] = segment(left_hip_angle, leftcycles)
+    # plot(left_hip_angle, "angulo do quadril esquerdo", 1)
 
-    segmented_angles['left_ankle'] = segmenta(left_ankle_angle, leftciclos)
-    #plot(left_ankle_angle, "angulo do tornozelo esquerdo", 2)
+    segmented_angles['left_ankle'] = segment(left_ankle_angle, leftcycles)
+    # plot(left_ankle_angle, "angulo do tornozelo esquerdo", 2)
 
-    segmented_angles['right_knee'] = segmenta(right_knee_angle, rightciclos)
-    #plot(right_knee_angle,"angulo do joelho direito", 3)
+    segmented_angles['right_knee'] = segment(right_knee_angle, rightcycles)
+    # plot(right_knee_angle,"angulo do joelho direito", 3)
 
-    segmented_angles['right_hip'] = segmenta(right_hip_angle, rightciclos)
-    #plot(right_hip_angle,"angulo do quadril direito", 4)
+    segmented_angles['right_hip'] = segment(right_hip_angle, rightcycles)
+    # plot(right_hip_angle,"angulo do quadril direito", 4)
 
-    segmented_angles['right_ankle'] = segmenta(right_ankle_angle, rightciclos)
-    #plot(right_ankle_angle,"angulo do tornozelo direito", 5)
+    segmented_angles['right_ankle'] = segment(right_ankle_angle, rightcycles)
+    # plot(right_ankle_angle,"angulo do tornozelo direito", 5)
 
     return segmented_angles
 
@@ -481,7 +476,7 @@ def stats( segments: dict ) -> dict: #old medias
         A dictionary of lists with the standard deviation of the input segments
     """
 
-    avg_signal = {} 
+    avg_signal = {}
     std_signal = {}
     for joint_angle in segments:
         # convert segments[joint_angle] into matrix
