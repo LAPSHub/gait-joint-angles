@@ -104,7 +104,7 @@ def detect_segment(data):
 
     return indexes
 
-def segmenta(data: list, indexes: list) -> list: #, string, n):
+def segment(data: list, indexes: list) -> list: #, string, n):
     """ Segment complete joint angle signals according to gait cycles. 
 
     Parameters
@@ -365,7 +365,7 @@ def read_data( path_to_data_files: str ) -> list:
 
     return anatomical_points, joint_angles
 
-def segment(joint_angles: dict) -> dict : 
+def segmented(joint_angles: dict) -> dict :
     # avaliar melhor essas funções que usam plot associados
     # tirar o plot delas
     """ Segment data by gait cycles
