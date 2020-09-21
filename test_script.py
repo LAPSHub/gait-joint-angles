@@ -10,7 +10,7 @@ path_to_json = './keypoints/'
 anatomical_points, joint_angles = lg.read_data(path_to_json) #implemented, need test
 
 # signal segmentation
-segmented_angles =  lg.segment(joint_angles)
+segmented_angles =  lg.segmented(joint_angles)
 
 # average signals
 averaged_signals, standard_deviation_signals = lg.stats(segmented_angles)
