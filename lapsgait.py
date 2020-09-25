@@ -7,6 +7,7 @@ import math
 import matplotlib.pyplot as plt
 import numpy as np
 import scipy.ndimage
+import pandas as pd
 
 
 def get_angle(upper, central, lower, which_part):
@@ -366,29 +367,15 @@ def read_data( path_to_data_files: str ) -> list:
     right_hip_angle   = scipy.ndimage.gaussian_filter(right_hip_angle, sigma=5)
     right_ankle_angle = scipy.ndimage.gaussian_filter(right_ankle_angle, sigma=2)
 
-    anatomical_points = {}
-    anatomical_points['head'] = h
-    anatomical_points['trunk'] = t
-    anatomical_points['mid_hip'] = mh
-    anatomical_points['left_knee'] = lk
-    anatomical_points['left_hip'] = lh
-    anatomical_points['left_ankle'] = la
-    anatomical_points['left_foot'] = lf
-    anatomical_points['left_heel'] = lh
-    anatomical_points['right_knee'] = rk
-    anatomical_points['right_hip'] = rh
-    anatomical_points['right_ankle'] = ra
-    anatomical_points['right_foot'] = rf
-    anatomical_points['right_heel'] = rhe
+    anatomicals = [h, t, mh, lk, lh, la, lf, lhe, rk, rh, ra, rf, rhe]
+    anatomical_points = pd.DataFrame(anatomicals).transpose()
+    anatomical_points.columns = ['head', 'trunk', 'midhip', 'left_knee', 'left_hip', 'left_ankle', 'left_foot',
+                                 'left_heel', 'right_knee', 'right_hip', 'right_ankle', 'right_foot', 'right_heel']
 
-    joint_angles = {}
-    joint_angles['head'] = head_pos 
-    joint_angles['left_knee'] = left_knee_angle 
-    joint_angles['left_hip'] = left_hip_angle 
-    joint_angles['left_ankle'] = left_ankle_angle 
-    joint_angles['right_knee'] = right_knee_angle 
-    joint_angles['right_hip'] = right_hip_angle 
-    joint_angles['right_ankle'] = right_ankle_angle 
+    angles = [head_pos, left_knee_angle, left_hip_angle, left_ankle_angle, right_knee_angle,
+              right_hip_angle, right_ankle_angle]
+    joint_angles = pd.DataFrame(angles).transpose()
+    joint_angles.columns = ['head', 'left_knee', 'left_hip', 'left_ankle', 'right_knee', 'right_hip', 'right_ankle']
 
     return anatomical_points, joint_angles
 
