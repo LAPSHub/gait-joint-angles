@@ -7,6 +7,7 @@ import math
 import matplotlib.pyplot as plt
 import numpy as np
 import scipy.ndimage
+import pandas as pd
 
 
 def get_angle(upper, central, lower, which_part):
@@ -212,6 +213,20 @@ def read_data( path_to_data_files: str ) -> list:
     right_knee_angle = []
     right_ankle_angle = []
 
+    h = []
+    t = []
+    mh = []
+    lk = []
+    lh = []
+    la = []
+    lf = []
+    lhe = []
+    rk = []
+    rh = []
+    ra = []
+    rf = []
+    rhe = []
+
     #leitura dos dados na pasta selecionada
     # --- rfz: deve haver uma maneira mais fácil de fazer ---
     for index,js in enumerate(json_files):
@@ -288,21 +303,34 @@ def read_data( path_to_data_files: str ) -> list:
             if len(jsondata["part_candidates"][0]["24"]) > 1 else 0
 
         #criam-se arrays para armazenar os pares de posicoes
-        head = np.array([head_x,head_y])
-        trunk = np.array([trunk_x,trunk_y])
-        mid_hip = np.array([mid_hip_x,mid_hip_y])
+        head = np.array([head_x, head_y])
+        h.insert(index, head)
+        trunk = np.array([trunk_x, trunk_y])
+        t.insert(index, trunk)
+        mid_hip = np.array([mid_hip_x, mid_hip_y])
+        mh.insert(index, mid_hip)
 
-        left_knee = np.array([left_knee_x,left_knee_y])
-        left_hip = np.array([left_hip_x,left_hip_y])
-        left_ankle = np.array([left_ankle_x,left_ankle_y])
-        left_foot = np.array([left_toe_x,left_toe_y])
-        left_heel = np.array([left_heel_x,left_heel_y])
+        left_knee = np.array([left_knee_x, left_knee_y])
+        lk.insert(index, left_knee)
+        left_hip = np.array([left_hip_x, left_hip_y])
+        lh.insert(index, left_hip)
+        left_ankle = np.array([left_ankle_x, left_ankle_y])
+        la.insert(index, left_ankle)
+        left_foot = np.array([left_toe_x, left_toe_y])
+        lf.insert(index, left_foot)
+        left_heel = np.array([left_heel_x, left_heel_y])
+        lhe.insert(index, left_heel)
 
-        right_knee = np.array([right_knee_x,right_knee_y])
-        right_hip = np.array([right_hip_x,right_hip_y])
-        right_ankle = np.array([right_ankle_x,right_ankle_y])
-        right_foot = np.array([right_toe_x,right_toe_y])
-        right_heel = np.array([right_heel_x,right_heel_y])
+        right_knee = np.array([right_knee_x, right_knee_y])
+        rk.insert(index, right_knee)
+        right_hip = np.array([right_hip_x, right_hip_y])
+        rh.insert(index, right_hip)
+        right_ankle = np.array([right_ankle_x, right_ankle_y])
+        ra.insert(index, right_ankle)
+        right_foot = np.array([right_toe_x, right_toe_y])
+        rf.insert(index, right_foot)
+        right_heel = np.array([right_heel_x, right_heel_y])
+        rhe.insert(index, right_heel)
 
         # calculam-se os angulos
         lha = get_angle(trunk, mid_hip, left_knee, 'hip')
@@ -339,29 +367,15 @@ def read_data( path_to_data_files: str ) -> list:
     right_hip_angle   = scipy.ndimage.gaussian_filter(right_hip_angle, sigma=5)
     right_ankle_angle = scipy.ndimage.gaussian_filter(right_ankle_angle, sigma=2)
 
-    anatomical_points = {}
-    anatomical_points['head'] = head
-    anatomical_points['trunck'] = trunk
-    anatomical_points['mid_hip'] = mid_hip
-    anatomical_points['left_knee'] = left_knee
-    anatomical_points['left_hip'] = left_hip
-    anatomical_points['left_ankle'] = left_ankle
-    anatomical_points['left_foot'] = left_foot
-    anatomical_points['left_heel'] = left_heel
-    anatomical_points['right_knee'] = right_knee
-    anatomical_points['right_hip'] = right_hip
-    anatomical_points['right_ankle'] = right_ankle
-    anatomical_points['right_foot'] = right_foot
-    anatomical_points['right_heel'] = right_heel
+    anatomicals = [h, t, mh, lk, lh, la, lf, lhe, rk, rh, ra, rf, rhe]
+    anatomical_points = pd.DataFrame(anatomicals).transpose()
+    anatomical_points.columns = ['head', 'trunk', 'midhip', 'left_knee', 'left_hip', 'left_ankle', 'left_foot',
+                                 'left_heel', 'right_knee', 'right_hip', 'right_ankle', 'right_foot', 'right_heel']
 
-    joint_angles = {}
-    joint_angles['head'] = head_pos 
-    joint_angles['left_knee'] = left_knee_angle 
-    joint_angles['left_hip'] = left_hip_angle 
-    joint_angles['left_ankle'] = left_ankle_angle 
-    joint_angles['right_knee'] = right_knee_angle 
-    joint_angles['right_hip'] = right_hip_angle 
-    joint_angles['right_ankle'] = right_ankle_angle 
+    angles = [head_pos, left_knee_angle, left_hip_angle, left_ankle_angle, right_knee_angle,
+              right_hip_angle, right_ankle_angle]
+    joint_angles = pd.DataFrame(angles).transpose()
+    joint_angles.columns = ['head', 'left_knee', 'left_hip', 'left_ankle', 'right_knee', 'right_hip', 'right_ankle']
 
     return anatomical_points, joint_angles
 
