@@ -4,7 +4,6 @@
 import os
 import json
 import math
-import matplotlib.pyplot as plt
 import numpy as np
 import scipy.ndimage
 import pandas as pd
@@ -136,11 +135,11 @@ def read_data( path_to_data_files: str ) -> list:
 
     Returns
     -------
-    anatomical_points: dict
-        a dictionary of lists containing the selected anatomical points
+    anatomical_points: pd.DataFrame
+        a dataframe of lists containing the selected anatomical points
 
-    joint_angles: dict
-        a dictionary of arrays containing the calculated joit angles
+    joint_angles: pd.DataFrame
+        a dataframe of arrays containing the calculated joit angles
     """
 
     json_files = [pos_json for pos_json in sorted(os.listdir(
@@ -305,8 +304,8 @@ def read_data( path_to_data_files: str ) -> list:
     left_hip_angle = scipy.ndimage.gaussian_filter(left_hip_angle, sigma=5)
     left_ankle_angle = scipy.ndimage.gaussian_filter(left_ankle_angle, sigma=5)
 
-    right_knee_angle  = scipy.ndimage.gaussian_filter(right_knee_angle, sigma=5)
-    right_hip_angle   = scipy.ndimage.gaussian_filter(right_hip_angle, sigma=5)
+    right_knee_angle = scipy.ndimage.gaussian_filter(right_knee_angle, sigma=5)
+    right_hip_angle = scipy.ndimage.gaussian_filter(right_hip_angle, sigma=5)
     right_ankle_angle = scipy.ndimage.gaussian_filter(right_ankle_angle, sigma=2)
 
     # adds the lists in dataframes
@@ -323,15 +322,13 @@ def read_data( path_to_data_files: str ) -> list:
     return anatomical_points, joint_angles
 
 
-def segmented(joint_angles: dict) -> dict :
-    # avaliar melhor essas funções que usam plot associados
-    # tirar o plot delas
+def segmented(joint_angles: pd.DataFrame ) -> dict :
     """ Segment data by gait cycles
 
     Parameters
     ----------
-    joint_angles: dict
-        Dictionary of lists containing joint angles
+    joint_angles: pd.DataFrame
+        Dataframe of lists containing joint angles
 
     Returns
     -------
