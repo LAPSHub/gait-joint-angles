@@ -4,7 +4,6 @@
 import os
 import json
 import math
-import matplotlib.pyplot as plt
 import numpy as np
 import scipy.ndimage
 import pandas as pd
@@ -27,7 +26,6 @@ def get_angle(upper, central, lower, which_part):
              @ = arccos(-----------) -> dot product of two vectors
                  |ba|*|bx|
     """
-    # todo: translate variable names to english
 
     if upper[0] == 0 or upper[1] == 0 or central[0] == 0 or central[1] == 0 or lower[0] == 0 or lower[
         1] == 0:
@@ -38,8 +36,6 @@ def get_angle(upper, central, lower, which_part):
 
         if which_part == 'knee':
             reference = (-v1 / np.linalg.norm(v1)) * np.linalg.norm(v2)
-            # prod_vetorial não é usado por se tratar de aplicação em 2d
-            # prod_vetorial = np.linalg.norm(np.cross(v1,v2))/(np.linalg.norm(v1)*np.linalg.norm(v2))
             dot_product = np.arccos(np.dot(v1, v2) / (np.linalg.norm(v1) * np.linalg.norm(v2)))
 
             if v2[1] > reference[1]:
@@ -50,9 +46,6 @@ def get_angle(upper, central, lower, which_part):
 
         if which_part == 'hip':
             reference = (-v1 / np.linalg.norm(v1)) * np.linalg.norm(v2)
-
-            # prod_vetorial não é usado por se tratar de aplicação em 2d
-            # prod_vetorial = np.linalg.norm(np.cross(v1,v2))/(np.linalg.norm(v1)*np.linalg.norm(v2))
             dot_product = np.arccos(np.dot(v1, v2) / (np.linalg.norm(v1) * np.linalg.norm(v2)))
 
             if v2[0] > reference[0]:
@@ -64,13 +57,11 @@ def get_angle(upper, central, lower, which_part):
         if which_part == 'ankle':
             reference = v1[1], -v1[0]
             reference = (reference / np.linalg.norm(v1)) * np.linalg.norm(v2)
-
-            # prod_vetorial não é usado por se tratar de aplicação em 2d
-            # prod_vetorial = np.linalg.norm(np.cross(referencia, v2)) / (np.linalg.norm(referencia) * np.linalg.norm(v2))
             dot_product = np.arccos(np.dot(reference, v2) / (np.linalg.norm(reference) * np.linalg.norm(v2)))
 
             if v2[1] < reference[1]:
                 angle = -np.rad2deg(dot_product)
+
             else:
                 angle = np.rad2deg(dot_product)
     return angle
@@ -105,7 +96,8 @@ def detect_segment(data):
 
     return indexes
 
-def segment(data: list, indexes: list) -> list: #, string, n):
+
+def segment(data: list, indexes: list) -> list:
     """ Segment complete joint angle signals according to gait cycles. 
 
     Parameters
@@ -127,58 +119,10 @@ def segment(data: list, indexes: list) -> list: #, string, n):
         start = indexes[index]
         finish = indexes[index + 1]
         segdata = data[start:finish]
-
         segments.append(segdata)
-        # sugestão: eliminar todo o bloco
-        # justificativa: não há necessidade de armazenar os segmentos !
-        #
-        # bloco comentado por rfz
-        ## -- inserção feita pelo Clebson
-        ##Necessário criar pasta angles no diretório
-        ##Direciona uma pasta de destino para salvar os arquivos: Medankle_angle.npy,
-        ## medhip_angle.npy e medknee_angle.npy.
-        #path_name = './angles/' + str(n) + '_' + string
-        #np.save(path_name, segdata)
-        ## -- fim da inserção
-        # 
-        #x = list(range(start, finish))
-        #plt.title('segmentos de um ciclo')
-        #plt.plot(x, segdata, 'r')
-        #plt.xlabel('frames')
-        #plt.show()
-        # fim de bloco comentado por rfz
 
     return segments
 
-
-
-def plot(data, string, n): # is this function really necessary ?
-    """ Plot data.
-
-    Parameters
-    ----------
-    data : ???
-        The file location of the data file
-    string: str
-        Description
-    n: ???
-        Description
-
-    Returns
-    -------
-        0
-    """
-
-    x = range(len(data))
-    plt.figure(n)
-    plt.subplot(212)
-    plt.plot(x, data)
-    plt.title(string)
-    plt.xlabel('frames')
-    plt.ylabel('extension<-angle(degrees)->flexion')
-    plt.show()
-
-    return 0
 
 def read_data( path_to_data_files: str ) -> list:
     """ Read openpose data, and select anatomical points of interest for 
@@ -191,18 +135,17 @@ def read_data( path_to_data_files: str ) -> list:
 
     Returns
     -------
-    anatomical_points: dict
-        a dictionary of lists containing the selected anatomical points
+    anatomical_points: pd.DataFrame
+        a dataframe of lists containing the selected anatomical points
 
-    joint_angles: dict
-        a dictionary of arrays containing the calculated joit angles
+    joint_angles: pd.DataFrame
+        a dataframe of arrays containing the calculated joit angles
     """
 
     json_files = [pos_json for pos_json in sorted(os.listdir(
         path_to_data_files)) if pos_json.endswith('.json')]
 
-    # --- rfz: traduzir comentários
-    #inicializacao dos vetores que armazenam dados importantes
+    # initialization of vectors that store important data
     head_pos = []
 
     left_hip_angle = []
@@ -227,14 +170,14 @@ def read_data( path_to_data_files: str ) -> list:
     rf = []
     rhe = []
 
-    #leitura dos dados na pasta selecionada
+    # read the json files
     # --- rfz: deve haver uma maneira mais fácil de fazer ---
     for index,js in enumerate(json_files):
         f = open(os.path.join(path_to_data_files,js),'r')
         data = f.read()
         jsondata=json.loads(data)
         
-        #partes medianas
+        # middle parts
         head_x = jsondata["part_candidates"][0]["0"][0] \
             if len(jsondata["part_candidates"][0]["0"]) > 1 else 0
         head_y = jsondata["part_candidates"][0]["0"][1] \
@@ -250,7 +193,7 @@ def read_data( path_to_data_files: str ) -> list:
         mid_hip_y = jsondata["part_candidates"][0]["8"][1] \
             if len(jsondata["part_candidates"][0]["8"]) > 1 else 0
     
-        #parte esquerda
+        # left part
         left_hip_x = jsondata["part_candidates"][0]["12"][0] \
             if len(jsondata["part_candidates"][0]["12"]) > 1 else 0
         left_hip_y = jsondata["part_candidates"][0]["12"][1] \
@@ -276,7 +219,7 @@ def read_data( path_to_data_files: str ) -> list:
         left_heel_y = jsondata["part_candidates"][0]["21"][1] \
             if len(jsondata["part_candidates"][0]["21"]) > 1 else 0
 
-        #parte direita
+        # right part
         right_hip_x = jsondata["part_candidates"][0]["9"][0] \
             if len(jsondata["part_candidates"][0]["9"]) > 1 else 0
         right_hip_y = jsondata["part_candidates"][0]["9"][1] \
@@ -302,7 +245,7 @@ def read_data( path_to_data_files: str ) -> list:
         right_heel_y = jsondata["part_candidates"][0]["24"][1] \
             if len(jsondata["part_candidates"][0]["24"]) > 1 else 0
 
-        #criam-se arrays para armazenar os pares de posicoes
+        # create arrays to store pairs of positions and then add to lists
         head = np.array([head_x, head_y])
         h.insert(index, head)
         trunk = np.array([trunk_x, trunk_y])
@@ -332,7 +275,7 @@ def read_data( path_to_data_files: str ) -> list:
         right_heel = np.array([right_heel_x, right_heel_y])
         rhe.insert(index, right_heel)
 
-        # calculam-se os angulos
+        # calculates the angles and adds in lists
         lha = get_angle(trunk, mid_hip, left_knee, 'hip')
         left_hip_angle.insert(index, lha)
 
@@ -354,19 +297,18 @@ def read_data( path_to_data_files: str ) -> list:
         right_ankle_angle.insert(index, raa)
 
 
-    # função implementa um filtro gaussiano 1-D. O desvio padrão do filtro
-    # gaussiano é passado pelo parâmetro sigma]
-    # rfz: Por que é feita uma filtragem aqui? Como são determinados os sigmas?
+    # passes the angles through a Gaussian filter (standard deviation = sigma)
     head_pos = scipy.ndimage.gaussian_filter(head_pos, sigma=2)
 
     left_knee_angle = scipy.ndimage.gaussian_filter(left_knee_angle, sigma=3)
     left_hip_angle = scipy.ndimage.gaussian_filter(left_hip_angle, sigma=5)
     left_ankle_angle = scipy.ndimage.gaussian_filter(left_ankle_angle, sigma=5)
 
-    right_knee_angle  = scipy.ndimage.gaussian_filter(right_knee_angle, sigma=5)
-    right_hip_angle   = scipy.ndimage.gaussian_filter(right_hip_angle, sigma=5)
+    right_knee_angle = scipy.ndimage.gaussian_filter(right_knee_angle, sigma=5)
+    right_hip_angle = scipy.ndimage.gaussian_filter(right_hip_angle, sigma=5)
     right_ankle_angle = scipy.ndimage.gaussian_filter(right_ankle_angle, sigma=2)
 
+    # adds the lists in dataframes
     anatomicals = [h, t, mh, lk, lh, la, lf, lhe, rk, rh, ra, rf, rhe]
     anatomical_points = pd.DataFrame(anatomicals).transpose()
     anatomical_points.columns = ['head', 'trunk', 'midhip', 'left_knee', 'left_hip', 'left_ankle', 'left_foot',
@@ -379,15 +321,14 @@ def read_data( path_to_data_files: str ) -> list:
 
     return anatomical_points, joint_angles
 
-def segmented(joint_angles: dict) -> dict :
-    # avaliar melhor essas funções que usam plot associados
-    # tirar o plot delas
+
+def segmented(joint_angles: pd.DataFrame ) -> dict :
     """ Segment data by gait cycles
 
     Parameters
     ----------
-    joint_angles: dict
-        Dictionary of lists containing joint angles
+    joint_angles: pd.DataFrame
+        Dataframe of lists containing joint angles
 
     Returns
     -------
@@ -409,24 +350,14 @@ def segmented(joint_angles: dict) -> dict :
 
     segmented_angles = {}
     segmented_angles['left_knee'] = segment(left_knee_angle, leftcycles)
-    # plot(left_knee_angle, "angulo do joelho esquerdo", 0)
-
     segmented_angles['left_hip'] = segment(left_hip_angle, leftcycles)
-    # plot(left_hip_angle, "angulo do quadril esquerdo", 1)
-
     segmented_angles['left_ankle'] = segment(left_ankle_angle, leftcycles)
-    # plot(left_ankle_angle, "angulo do tornozelo esquerdo", 2)
-
     segmented_angles['right_knee'] = segment(right_knee_angle, rightcycles)
-    # plot(right_knee_angle,"angulo do joelho direito", 3)
-
     segmented_angles['right_hip'] = segment(right_hip_angle, rightcycles)
-    # plot(right_hip_angle,"angulo do quadril direito", 4)
-
     segmented_angles['right_ankle'] = segment(right_ankle_angle, rightcycles)
-    # plot(right_ankle_angle,"angulo do tornozelo direito", 5)
 
     return segmented_angles
+
 
 def segments2matrix(segs: list, method: str = 'zeros' ) -> np.array :
     """ Convert a colection of joint segments into a single matrix.
@@ -446,31 +377,27 @@ def segments2matrix(segs: list, method: str = 'zeros' ) -> np.array :
         Matrix with all segments reshaped. Each line contains a segment.
     """
 
-    # converte arrays em lista de listas
+    # converts arrays into lists
     lst_arrays = []
-    # calcula o tamanho do maior segmento
+    # calculates the size of the largest segment
     max_length = 0
     for item in segs:
         if len(item) > max_length:
             max_length = len(item)
         lst_arrays.append(list(item))
 
-    #print('Max length: ', max_length)
-
-    # vefifica o método (por enquanto, preenche de zeros)
+    # checks the method (for now, fills in with zeros)
     if method == 'zeros':
         for item in lst_arrays:
-            #print(item)
             if len(item) < max_length:
                 diff = max_length - len(item)
                 for new in range(diff):
                     item.append(0)
-            #print(item)
 
     matrix_of_segments = np.array(lst_arrays)
-    #print( matrix_of_segments.shape)
     
     return matrix_of_segments
+
 
 def stats( segments: dict ) -> dict: #old medias  
     """ Calculate the average and the standard deviation of joint 
