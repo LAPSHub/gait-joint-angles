@@ -27,9 +27,9 @@ def get_angle(upper, central, lower, which_part):
                  |ba|*|bx|
     """
 
-    if upper[0] == 0 or upper[1] == 0 or central[0] == 0 or central[1] == 0 or lower[0] == 0 or lower[
-        1] == 0:
-        angle = 0
+    if upper[0] == None or upper[1] == None or central[0] == None or central[1] == None or lower[0] == None or lower[
+        1] == None:
+        angle = None
     else:
         v1 = upper - central
         v2 = lower - central
@@ -179,71 +179,71 @@ def read_data( path_to_data_files: str ) -> list:
         
         # middle parts
         head_x = jsondata["part_candidates"][0]["0"][0] \
-            if len(jsondata["part_candidates"][0]["0"]) > 1 else 0
+            if len(jsondata["part_candidates"][0]["0"]) > 1 else None
         head_y = jsondata["part_candidates"][0]["0"][1] \
-            if len(jsondata["part_candidates"][0]["0"]) > 1 else 0
+            if len(jsondata["part_candidates"][0]["0"]) > 1 else None
 
         trunk_x = jsondata["part_candidates"][0]["1"][0] \
-            if len(jsondata["part_candidates"][0]["1"]) > 1 else 0
+            if len(jsondata["part_candidates"][0]["1"]) > 1 else None
         trunk_y = jsondata["part_candidates"][0]["1"][1] \
-            if len(jsondata["part_candidates"][0]["1"]) > 1 else 0
+            if len(jsondata["part_candidates"][0]["1"]) > 1 else None
 
         mid_hip_x = jsondata["part_candidates"][0]["8"][0] \
-            if len(jsondata["part_candidates"][0]["8"]) > 1 else 0
+            if len(jsondata["part_candidates"][0]["8"]) > 1 else None
         mid_hip_y = jsondata["part_candidates"][0]["8"][1] \
-            if len(jsondata["part_candidates"][0]["8"]) > 1 else 0
+            if len(jsondata["part_candidates"][0]["8"]) > 1 else None
     
         # left part
         left_hip_x = jsondata["part_candidates"][0]["12"][0] \
-            if len(jsondata["part_candidates"][0]["12"]) > 1 else 0
+            if len(jsondata["part_candidates"][0]["12"]) > 1 else None
         left_hip_y = jsondata["part_candidates"][0]["12"][1] \
-            if len(jsondata["part_candidates"][0]["12"]) > 1 else 0
+            if len(jsondata["part_candidates"][0]["12"]) > 1 else None
 
         left_knee_x = jsondata["part_candidates"][0]["13"][0] \
-            if len(jsondata["part_candidates"][0]["13"]) > 1 else 0
+            if len(jsondata["part_candidates"][0]["13"]) > 1 else None
         left_knee_y = jsondata["part_candidates"][0]["13"][1] \
-            if len(jsondata["part_candidates"][0]["13"]) > 1 else 0
+            if len(jsondata["part_candidates"][0]["13"]) > 1 else None
 
         left_ankle_x = jsondata["part_candidates"][0]["14"][0] \
-            if len(jsondata["part_candidates"][0]["14"]) > 1 else 0
+            if len(jsondata["part_candidates"][0]["14"]) > 1 else None
         left_ankle_y = jsondata["part_candidates"][0]["14"][1] \
-            if len(jsondata["part_candidates"][0]["14"]) > 1 else 0
+            if len(jsondata["part_candidates"][0]["14"]) > 1 else None
 
         left_toe_x = jsondata["part_candidates"][0]["20"][0] \
-            if len(jsondata["part_candidates"][0]["20"]) > 1 else 0
+            if len(jsondata["part_candidates"][0]["20"]) > 1 else None
         left_toe_y = jsondata["part_candidates"][0]["20"][1] \
-            if len(jsondata["part_candidates"][0]["20"]) > 1 else 0
+            if len(jsondata["part_candidates"][0]["20"]) > 1 else None
 
         left_heel_x = jsondata["part_candidates"][0]["21"][0] \
-            if len(jsondata["part_candidates"][0]["21"]) > 1 else 0
+            if len(jsondata["part_candidates"][0]["21"]) > 1 else None
         left_heel_y = jsondata["part_candidates"][0]["21"][1] \
-            if len(jsondata["part_candidates"][0]["21"]) > 1 else 0
+            if len(jsondata["part_candidates"][0]["21"]) > 1 else None
 
         # right part
         right_hip_x = jsondata["part_candidates"][0]["9"][0] \
-            if len(jsondata["part_candidates"][0]["9"]) > 1 else 0
+            if len(jsondata["part_candidates"][0]["9"]) > 1 else None
         right_hip_y = jsondata["part_candidates"][0]["9"][1] \
-            if len(jsondata["part_candidates"][0]["9"]) > 1 else 0
+            if len(jsondata["part_candidates"][0]["9"]) > 1 else None
 
         right_knee_x = jsondata["part_candidates"][0]["10"][0] \
-            if len(jsondata["part_candidates"][0]["10"]) > 1 else 0
+            if len(jsondata["part_candidates"][0]["10"]) > 1 else None
         right_knee_y = jsondata["part_candidates"][0]["10"][1] \
-            if len(jsondata["part_candidates"][0]["10"]) > 1 else 0
+            if len(jsondata["part_candidates"][0]["10"]) > 1 else None
 
         right_ankle_x = jsondata["part_candidates"][0]["11"][0] \
-            if len(jsondata["part_candidates"][0]["11"]) > 1 else 0
+            if len(jsondata["part_candidates"][0]["11"]) > 1 else None
         right_ankle_y = jsondata["part_candidates"][0]["11"][1] \
-            if len(jsondata["part_candidates"][0]["11"]) > 1 else 0
+            if len(jsondata["part_candidates"][0]["11"]) > 1 else None
 
         right_toe_x = jsondata["part_candidates"][0]["22"][0] \
-            if len(jsondata["part_candidates"][0]["22"]) > 1 else 0
+            if len(jsondata["part_candidates"][0]["22"]) > 1 else None
         right_toe_y = jsondata["part_candidates"][0]["22"][1] \
-            if len(jsondata["part_candidates"][0]["22"]) > 1 else 0
+            if len(jsondata["part_candidates"][0]["22"]) > 1 else None
 
         right_heel_x = jsondata["part_candidates"][0]["24"][0] \
-            if len(jsondata["part_candidates"][0]["24"]) > 1 else 0
+            if len(jsondata["part_candidates"][0]["24"]) > 1 else None
         right_heel_y = jsondata["part_candidates"][0]["24"][1] \
-            if len(jsondata["part_candidates"][0]["24"]) > 1 else 0
+            if len(jsondata["part_candidates"][0]["24"]) > 1 else None
 
         # create arrays to store pairs of positions and then add to lists
         head = np.array([head_x, head_y])
@@ -275,26 +275,33 @@ def read_data( path_to_data_files: str ) -> list:
         right_heel = np.array([right_heel_x, right_heel_y])
         rhe.insert(index, right_heel)
 
-        # calculates the angles and adds in lists
-        lha = get_angle(trunk, mid_hip, left_knee, 'hip')
-        left_hip_angle.insert(index, lha)
+        # calculam-se os angulos
+        if get_angle(trunk, mid_hip, left_knee, 'hip') != None:
+            lha = get_angle(trunk, mid_hip, left_knee, 'hip')
+            left_hip_angle.insert(index, lha)
 
-        lka = get_angle(left_hip, left_knee, left_ankle, 'knee')
-        left_knee_angle.insert(index, lka)
+        if get_angle(left_hip, left_knee, left_ankle, 'knee') != None:
+            lka = get_angle(left_hip, left_knee, left_ankle, 'knee')
+            left_knee_angle.insert(index, lka)
 
-        laa = get_angle(left_knee, left_ankle, left_foot, 'ankle')
-        left_ankle_angle.insert(index, laa)
+        if get_angle(left_knee, left_ankle, left_foot, 'ankle') != None:
+            laa = get_angle(left_knee, left_ankle, left_foot, 'ankle')
+            left_ankle_angle.insert(index, laa)
 
-        head_pos.insert(index, head[1])
+        if head[1] != None:
+            head_pos.insert(index, head[1])
 
-        rha = 180 - get_angle(trunk, right_hip, right_knee, 'hip')
-        right_hip_angle.insert(index, rha)
+        if get_angle(trunk, right_hip, right_knee, 'hip') != None:
+            rha = 180 - get_angle(trunk, right_hip, right_knee, 'hip')
+            right_hip_angle.insert(index, rha)
 
-        rka = 180 - get_angle(right_hip, right_knee, right_ankle, 'knee')
-        right_knee_angle.insert(index, rka)
+        if get_angle(right_hip, right_knee, right_ankle, 'knee') != None:
+            rka = 180 - get_angle(right_hip, right_knee, right_ankle, 'knee')
+            right_knee_angle.insert(index, rka)
 
-        raa = 90 - get_angle(right_knee, right_ankle, right_foot, 'ankle')
-        right_ankle_angle.insert(index, raa)
+        if get_angle(right_knee, right_ankle, right_foot, 'ankle') != None:
+            raa = 90 - get_angle(right_knee, right_ankle, right_foot, 'ankle')
+            right_ankle_angle.insert(index, raa)
 
 
     # passes the angles through a Gaussian filter (standard deviation = sigma)
