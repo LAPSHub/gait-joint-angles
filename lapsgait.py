@@ -4,12 +4,13 @@
 import os
 import json
 import math
+import matplotlib.pyplot as plt
 import numpy as np
 import scipy.ndimage
 import pandas as pd
 
 
-def get_angle(upper, central, lower, which_part):
+def get_angle(pair_1, pair_2, pair_3, which_part):
     """ Calculate angles:
 
                a (ax,ay)
@@ -25,17 +26,45 @@ def get_angle(upper, central, lower, which_part):
                            ba.bc
              @ = arccos(-----------) -> dot product of two vectors
                  |ba|*|bx|
-    """
+                 
+    Check for angles and calculate angles using direction vectors found
+    with the keypoints provided by the arrays that store the pairs of positions.
+    
+    Parameters
+    ----------
+    pair_1 : array
+        Upper ordered pairs extracted from .json files
 
-    if upper[0] == None or upper[1] == None or central[0] == None or central[1] == None or lower[0] == None or lower[
-        1] == None:
-        angle = None
+    pair_2 : array
+        Central ordered pairs extracted from .json files
+
+    pair_3 : array
+        Lower ordered pairs extracted from .json files
+
+    which_part : str
+        The body part under analysis
+
+    Returns
+    -------
+    angle : float
+        the generated data are stored in lists for the part of the body
+        under study.
+
+    """
+    # todo: translate variable names to english
+
+    if pair_1[0] == 0 or pair_1[1] == 0 or pair_2[0] == 0 or pair_2[1] == 0 or pair_3[0] == 0 or pair_3[
+        1] == 0:
+        angle = 0
+
+    
     else:
-        v1 = upper - central
-        v2 = lower - central
+        v1 = pairs_1 - pairs_2
+        v2 = pairs_3 - pairs_2
 
         if which_part == 'knee':
             reference = (-v1 / np.linalg.norm(v1)) * np.linalg.norm(v2)
+            
             dot_product = np.arccos(np.dot(v1, v2) / (np.linalg.norm(v1) * np.linalg.norm(v2)))
 
             if v2[1] > reference[1]:
@@ -46,6 +75,8 @@ def get_angle(upper, central, lower, which_part):
 
         if which_part == 'hip':
             reference = (-v1 / np.linalg.norm(v1)) * np.linalg.norm(v2)
+
+            
             dot_product = np.arccos(np.dot(v1, v2) / (np.linalg.norm(v1) * np.linalg.norm(v2)))
 
             if v2[0] > reference[0]:
@@ -57,11 +88,12 @@ def get_angle(upper, central, lower, which_part):
         if which_part == 'ankle':
             reference = v1[1], -v1[0]
             reference = (reference / np.linalg.norm(v1)) * np.linalg.norm(v2)
+
+
             dot_product = np.arccos(np.dot(reference, v2) / (np.linalg.norm(reference) * np.linalg.norm(v2)))
 
             if v2[1] < reference[1]:
                 angle = -np.rad2deg(dot_product)
-
             else:
                 angle = np.rad2deg(dot_product)
     return angle
@@ -96,8 +128,7 @@ def detect_segment(data):
 
     return indexes
 
-
-def segment(data: list, indexes: list) -> list:
+def segment(data: list, indexes: list) -> list: #, string, n):
     """ Segment complete joint angle signals according to gait cycles. 
 
     Parameters
@@ -119,10 +150,41 @@ def segment(data: list, indexes: list) -> list:
         start = indexes[index]
         finish = indexes[index + 1]
         segdata = data[start:finish]
+
         segments.append(segdata)
+
 
     return segments
 
+
+
+def plot(data, string, n): # is this function really necessary ?
+    """ Plot data.
+
+    Parameters
+    ----------
+    data : ???
+        The file location of the data file
+    string: str
+        Description
+    n: ???
+        Description
+
+    Returns
+    -------
+        0
+    """
+
+    x = range(len(data))
+    plt.figure(n)
+    plt.subplot(212)
+    plt.plot(x, data)
+    plt.title(string)
+    plt.xlabel('frames')
+    plt.ylabel('extension<-angle(degrees)->flexion')
+    plt.show()
+
+    return 0
 
 def read_data( path_to_data_files: str ) -> list:
     """ Read openpose data, and select anatomical points of interest for 
@@ -135,17 +197,18 @@ def read_data( path_to_data_files: str ) -> list:
 
     Returns
     -------
-    anatomical_points: pd.DataFrame
-        a dataframe of lists containing the selected anatomical points
+    anatomical_points: dict
+        a dictionary of lists containing the selected anatomical points
 
-    joint_angles: pd.DataFrame
-        a dataframe of arrays containing the calculated joit angles
+    joint_angles: dict
+        a dictionary of arrays containing the calculated joit angles
     """
 
     json_files = [pos_json for pos_json in sorted(os.listdir(
         path_to_data_files)) if pos_json.endswith('.json')]
 
-    # initialization of vectors that store important data
+    # --- rfz: traduzir comentários
+    #inicializacao dos vetores que armazenam dados importantes
     head_pos = []
 
     left_hip_angle = []
@@ -170,82 +233,82 @@ def read_data( path_to_data_files: str ) -> list:
     rf = []
     rhe = []
 
-    # read the json files
+    #leitura dos dados na pasta selecionada
     # --- rfz: deve haver uma maneira mais fácil de fazer ---
     for index,js in enumerate(json_files):
         f = open(os.path.join(path_to_data_files,js),'r')
         data = f.read()
         jsondata=json.loads(data)
         
-        # middle parts
+        #partes medianas
         head_x = jsondata["part_candidates"][0]["0"][0] \
-            if len(jsondata["part_candidates"][0]["0"]) > 1 else None
+            if len(jsondata["part_candidates"][0]["0"]) > 1 else 0
         head_y = jsondata["part_candidates"][0]["0"][1] \
-            if len(jsondata["part_candidates"][0]["0"]) > 1 else None
+            if len(jsondata["part_candidates"][0]["0"]) > 1 else 0
 
         trunk_x = jsondata["part_candidates"][0]["1"][0] \
-            if len(jsondata["part_candidates"][0]["1"]) > 1 else None
+            if len(jsondata["part_candidates"][0]["1"]) > 1 else 0
         trunk_y = jsondata["part_candidates"][0]["1"][1] \
-            if len(jsondata["part_candidates"][0]["1"]) > 1 else None
+            if len(jsondata["part_candidates"][0]["1"]) > 1 else 0
 
         mid_hip_x = jsondata["part_candidates"][0]["8"][0] \
-            if len(jsondata["part_candidates"][0]["8"]) > 1 else None
+            if len(jsondata["part_candidates"][0]["8"]) > 1 else 0
         mid_hip_y = jsondata["part_candidates"][0]["8"][1] \
-            if len(jsondata["part_candidates"][0]["8"]) > 1 else None
+            if len(jsondata["part_candidates"][0]["8"]) > 1 else 0
     
-        # left part
+        #parte esquerda
         left_hip_x = jsondata["part_candidates"][0]["12"][0] \
-            if len(jsondata["part_candidates"][0]["12"]) > 1 else None
+            if len(jsondata["part_candidates"][0]["12"]) > 1 else 0
         left_hip_y = jsondata["part_candidates"][0]["12"][1] \
-            if len(jsondata["part_candidates"][0]["12"]) > 1 else None
+            if len(jsondata["part_candidates"][0]["12"]) > 1 else 0
 
         left_knee_x = jsondata["part_candidates"][0]["13"][0] \
-            if len(jsondata["part_candidates"][0]["13"]) > 1 else None
+            if len(jsondata["part_candidates"][0]["13"]) > 1 else 0
         left_knee_y = jsondata["part_candidates"][0]["13"][1] \
-            if len(jsondata["part_candidates"][0]["13"]) > 1 else None
+            if len(jsondata["part_candidates"][0]["13"]) > 1 else 0
 
         left_ankle_x = jsondata["part_candidates"][0]["14"][0] \
-            if len(jsondata["part_candidates"][0]["14"]) > 1 else None
+            if len(jsondata["part_candidates"][0]["14"]) > 1 else 0
         left_ankle_y = jsondata["part_candidates"][0]["14"][1] \
-            if len(jsondata["part_candidates"][0]["14"]) > 1 else None
+            if len(jsondata["part_candidates"][0]["14"]) > 1 else 0
 
         left_toe_x = jsondata["part_candidates"][0]["20"][0] \
-            if len(jsondata["part_candidates"][0]["20"]) > 1 else None
+            if len(jsondata["part_candidates"][0]["20"]) > 1 else 0
         left_toe_y = jsondata["part_candidates"][0]["20"][1] \
-            if len(jsondata["part_candidates"][0]["20"]) > 1 else None
+            if len(jsondata["part_candidates"][0]["20"]) > 1 else 0
 
         left_heel_x = jsondata["part_candidates"][0]["21"][0] \
-            if len(jsondata["part_candidates"][0]["21"]) > 1 else None
+            if len(jsondata["part_candidates"][0]["21"]) > 1 else 0
         left_heel_y = jsondata["part_candidates"][0]["21"][1] \
-            if len(jsondata["part_candidates"][0]["21"]) > 1 else None
+            if len(jsondata["part_candidates"][0]["21"]) > 1 else 0
 
-        # right part
+        #parte direita
         right_hip_x = jsondata["part_candidates"][0]["9"][0] \
-            if len(jsondata["part_candidates"][0]["9"]) > 1 else None
+            if len(jsondata["part_candidates"][0]["9"]) > 1 else 0
         right_hip_y = jsondata["part_candidates"][0]["9"][1] \
-            if len(jsondata["part_candidates"][0]["9"]) > 1 else None
+            if len(jsondata["part_candidates"][0]["9"]) > 1 else 0
 
         right_knee_x = jsondata["part_candidates"][0]["10"][0] \
-            if len(jsondata["part_candidates"][0]["10"]) > 1 else None
+            if len(jsondata["part_candidates"][0]["10"]) > 1 else 0
         right_knee_y = jsondata["part_candidates"][0]["10"][1] \
-            if len(jsondata["part_candidates"][0]["10"]) > 1 else None
+            if len(jsondata["part_candidates"][0]["10"]) > 1 else 0
 
         right_ankle_x = jsondata["part_candidates"][0]["11"][0] \
-            if len(jsondata["part_candidates"][0]["11"]) > 1 else None
+            if len(jsondata["part_candidates"][0]["11"]) > 1 else 0
         right_ankle_y = jsondata["part_candidates"][0]["11"][1] \
-            if len(jsondata["part_candidates"][0]["11"]) > 1 else None
+            if len(jsondata["part_candidates"][0]["11"]) > 1 else 0
 
         right_toe_x = jsondata["part_candidates"][0]["22"][0] \
-            if len(jsondata["part_candidates"][0]["22"]) > 1 else None
+            if len(jsondata["part_candidates"][0]["22"]) > 1 else 0
         right_toe_y = jsondata["part_candidates"][0]["22"][1] \
-            if len(jsondata["part_candidates"][0]["22"]) > 1 else None
+            if len(jsondata["part_candidates"][0]["22"]) > 1 else 0
 
         right_heel_x = jsondata["part_candidates"][0]["24"][0] \
-            if len(jsondata["part_candidates"][0]["24"]) > 1 else None
+            if len(jsondata["part_candidates"][0]["24"]) > 1 else 0
         right_heel_y = jsondata["part_candidates"][0]["24"][1] \
-            if len(jsondata["part_candidates"][0]["24"]) > 1 else None
+            if len(jsondata["part_candidates"][0]["24"]) > 1 else 0
 
-        # create arrays to store pairs of positions and then add to lists
+        #criam-se arrays para armazenar os pares de posicoes
         head = np.array([head_x, head_y])
         h.insert(index, head)
         trunk = np.array([trunk_x, trunk_y])
@@ -276,46 +339,40 @@ def read_data( path_to_data_files: str ) -> list:
         rhe.insert(index, right_heel)
 
         # calculam-se os angulos
-        if get_angle(trunk, mid_hip, left_knee, 'hip') != None:
-            lha = get_angle(trunk, mid_hip, left_knee, 'hip')
-            left_hip_angle.insert(index, lha)
+        lha = get_angle(trunk, mid_hip, left_knee, 'hip')
+        left_hip_angle.insert(index, lha)
 
-        if get_angle(left_hip, left_knee, left_ankle, 'knee') != None:
-            lka = get_angle(left_hip, left_knee, left_ankle, 'knee')
-            left_knee_angle.insert(index, lka)
+        lka = get_angle(left_hip, left_knee, left_ankle, 'knee')
+        left_knee_angle.insert(index, lka)
 
-        if get_angle(left_knee, left_ankle, left_foot, 'ankle') != None:
-            laa = get_angle(left_knee, left_ankle, left_foot, 'ankle')
-            left_ankle_angle.insert(index, laa)
+        laa = get_angle(left_knee, left_ankle, left_foot, 'ankle')
+        left_ankle_angle.insert(index, laa)
 
-        if head[1] != None:
-            head_pos.insert(index, head[1])
+        head_pos.insert(index, head[1])
 
-        if get_angle(trunk, right_hip, right_knee, 'hip') != None:
-            rha = 180 - get_angle(trunk, right_hip, right_knee, 'hip')
-            right_hip_angle.insert(index, rha)
+        rha = 180 - get_angle(trunk, right_hip, right_knee, 'hip')
+        right_hip_angle.insert(index, rha)
 
-        if get_angle(right_hip, right_knee, right_ankle, 'knee') != None:
-            rka = 180 - get_angle(right_hip, right_knee, right_ankle, 'knee')
-            right_knee_angle.insert(index, rka)
+        rka = 180 - get_angle(right_hip, right_knee, right_ankle, 'knee')
+        right_knee_angle.insert(index, rka)
 
-        if get_angle(right_knee, right_ankle, right_foot, 'ankle') != None:
-            raa = 90 - get_angle(right_knee, right_ankle, right_foot, 'ankle')
-            right_ankle_angle.insert(index, raa)
+        raa = 90 - get_angle(right_knee, right_ankle, right_foot, 'ankle')
+        right_ankle_angle.insert(index, raa)
 
 
-    # passes the angles through a Gaussian filter (standard deviation = sigma)
+    # função implementa um filtro gaussiano 1-D. O desvio padrão do filtro
+    # gaussiano é passado pelo parâmetro sigma]
+    # rfz: Por que é feita uma filtragem aqui? Como são determinados os sigmas?
     head_pos = scipy.ndimage.gaussian_filter(head_pos, sigma=2)
 
     left_knee_angle = scipy.ndimage.gaussian_filter(left_knee_angle, sigma=3)
     left_hip_angle = scipy.ndimage.gaussian_filter(left_hip_angle, sigma=5)
     left_ankle_angle = scipy.ndimage.gaussian_filter(left_ankle_angle, sigma=5)
 
-    right_knee_angle = scipy.ndimage.gaussian_filter(right_knee_angle, sigma=5)
-    right_hip_angle = scipy.ndimage.gaussian_filter(right_hip_angle, sigma=5)
+    right_knee_angle  = scipy.ndimage.gaussian_filter(right_knee_angle, sigma=5)
+    right_hip_angle   = scipy.ndimage.gaussian_filter(right_hip_angle, sigma=5)
     right_ankle_angle = scipy.ndimage.gaussian_filter(right_ankle_angle, sigma=2)
 
-    # adds the lists in dataframes
     anatomicals = [h, t, mh, lk, lh, la, lf, lhe, rk, rh, ra, rf, rhe]
     anatomical_points = pd.DataFrame(anatomicals).transpose()
     anatomical_points.columns = ['head', 'trunk', 'midhip', 'left_knee', 'left_hip', 'left_ankle', 'left_foot',
@@ -328,14 +385,15 @@ def read_data( path_to_data_files: str ) -> list:
 
     return anatomical_points, joint_angles
 
-
-def segmented(joint_angles: pd.DataFrame ) -> dict :
+def segmented(joint_angles: dict) -> dict :
+    # avaliar melhor essas funções que usam plot associados
+    # tirar o plot delas
     """ Segment data by gait cycles
 
     Parameters
     ----------
-    joint_angles: pd.DataFrame
-        Dataframe of lists containing joint angles
+    joint_angles: dict
+        Dictionary of lists containing joint angles
 
     Returns
     -------
@@ -357,14 +415,24 @@ def segmented(joint_angles: pd.DataFrame ) -> dict :
 
     segmented_angles = {}
     segmented_angles['left_knee'] = segment(left_knee_angle, leftcycles)
+    # plot(left_knee_angle, "angulo do joelho esquerdo", 0)
+
     segmented_angles['left_hip'] = segment(left_hip_angle, leftcycles)
+    # plot(left_hip_angle, "angulo do quadril esquerdo", 1)
+
     segmented_angles['left_ankle'] = segment(left_ankle_angle, leftcycles)
+    # plot(left_ankle_angle, "angulo do tornozelo esquerdo", 2)
+
     segmented_angles['right_knee'] = segment(right_knee_angle, rightcycles)
+    # plot(right_knee_angle,"angulo do joelho direito", 3)
+
     segmented_angles['right_hip'] = segment(right_hip_angle, rightcycles)
+    # plot(right_hip_angle,"angulo do quadril direito", 4)
+
     segmented_angles['right_ankle'] = segment(right_ankle_angle, rightcycles)
+    # plot(right_ankle_angle,"angulo do tornozelo direito", 5)
 
     return segmented_angles
-
 
 def segments2matrix(segs: list, method: str = 'zeros' ) -> np.array :
     """ Convert a colection of joint segments into a single matrix.
@@ -384,27 +452,31 @@ def segments2matrix(segs: list, method: str = 'zeros' ) -> np.array :
         Matrix with all segments reshaped. Each line contains a segment.
     """
 
-    # converts arrays into lists
+    # converte arrays em lista de listas
     lst_arrays = []
-    # calculates the size of the largest segment
+    # calcula o tamanho do maior segmento
     max_length = 0
     for item in segs:
         if len(item) > max_length:
             max_length = len(item)
         lst_arrays.append(list(item))
 
-    # checks the method (for now, fills in with zeros)
+    #print('Max length: ', max_length)
+
+    # vefifica o método (por enquanto, preenche de zeros)
     if method == 'zeros':
         for item in lst_arrays:
+            #print(item)
             if len(item) < max_length:
                 diff = max_length - len(item)
                 for new in range(diff):
                     item.append(0)
+            #print(item)
 
     matrix_of_segments = np.array(lst_arrays)
+    #print( matrix_of_segments.shape)
     
     return matrix_of_segments
-
 
 def stats( segments: dict ) -> dict: #old medias  
     """ Calculate the average and the standard deviation of joint 
