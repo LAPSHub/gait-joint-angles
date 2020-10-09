@@ -4,7 +4,7 @@ import lapsgait as lg  # loading lapsgait
 import matplotlib.pyplot as plt
 
 # path to .json files
-path_to_json = './keypoints/'
+path_to_json = './keypoints/v03'
 
 # read .json data and calculate joint angles
 anatomical_points, joint_angles = lg.read_data(path_to_json) #implemented, need test
