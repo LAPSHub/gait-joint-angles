@@ -26,7 +26,7 @@ plt.ylabel('Angles')
 
 # ploting segmented joint angles
 plt.figure(2)
-plt.hold(True)
+#plt.hold(True)
 plt.grid(True)
 for item in segmented_angles[joint]:
     plt.plot(item, 'r')
@@ -35,7 +35,7 @@ plt.xlabel('Samples')
 plt.ylabel('Angles')
 
 plt.figure(3)
-plt.hold(True)
+#plt.hold(True)
 plt.grid(True)
 plt.plot(averaged_signals[joint],'b')
 plt.title('Average of '+ joint)

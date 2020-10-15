@@ -9,33 +9,43 @@ import scipy.ndimage
 import pandas as pd
 
 
-def get_angle(upper, central, lower, which_part):
-    """ Calculate angles:
+def get_angle(pair_1: np.array, pair_2: np.array, pair_3: np.array, 
+        which_part: str)-> float:
+    """Check for angles and calculate angles using direction vectors found
+    with the keypoints provided by the arrays that store the pairs of positions.
+    
+    Parameters
+    ----------
+    pair_1 : array
+        Upper ordered pairs extracted from .json files
 
-               a (ax,ay)
+    pair_2 : array
+        Central ordered pairs extracted from .json files
 
-                  /
-                 /
-              ba/
-               /
-              /
-    b(bx,by) /)-> @
-             -------- c(cx,cy)
-          bc
-                           ba.bc
-             @ = arccos(-----------) -> dot product of two vectors
-                 |ba|*|bx|
+    pair_3 : array
+        Lower ordered pairs extracted from .json files
+
+    which_part : str
+        The body part under analysis
+
+    Returns
+    -------
+    angle : float
+        Calculated angle
+
     """
+    # todo: translate variable names to english
 
-    if upper[0] == None or upper[1] == None or central[0] == None or central[1] == None or lower[0] == None or lower[
+    if pair_1[0] == None or pair_1[1] == None or pair_2[0] == None or pair_2[1] == None or pair_3[0] == None or pair_3[
         1] == None:
         angle = None
     else:
-        v1 = upper - central
-        v2 = lower - central
+        v1 = pair_1 - pair_2
+        v2 = pair_3 - pair_2
 
         if which_part == 'knee':
             reference = (-v1 / np.linalg.norm(v1)) * np.linalg.norm(v2)
+            
             dot_product = np.arccos(np.dot(v1, v2) / (np.linalg.norm(v1) * np.linalg.norm(v2)))
 
             if v2[1] > reference[1]:
@@ -46,6 +56,8 @@ def get_angle(upper, central, lower, which_part):
 
         if which_part == 'hip':
             reference = (-v1 / np.linalg.norm(v1)) * np.linalg.norm(v2)
+
+            
             dot_product = np.arccos(np.dot(v1, v2) / (np.linalg.norm(v1) * np.linalg.norm(v2)))
 
             if v2[0] > reference[0]:
@@ -57,15 +69,15 @@ def get_angle(upper, central, lower, which_part):
         if which_part == 'ankle':
             reference = v1[1], -v1[0]
             reference = (reference / np.linalg.norm(v1)) * np.linalg.norm(v2)
+
+
             dot_product = np.arccos(np.dot(reference, v2) / (np.linalg.norm(reference) * np.linalg.norm(v2)))
 
             if v2[1] < reference[1]:
                 angle = -np.rad2deg(dot_product)
-
             else:
                 angle = np.rad2deg(dot_product)
     return angle
-
 
 def detect_segment(data):
     """ Find begining and ending points of gait cycles in angle signals
