@@ -1,13 +1,13 @@
 # gait-joint-angles
  
-Repository for the LaPS gait analysis laboratory project
+Code repository for the LaPS gait analysis laboratory project
 
 Currently, it comprises four scripts:
 
-- `calcula_angulo`: estimates angles of lower limb joints (hip, knee, and ankle) from points of interest data read from OpenPose output JSON files, segments data from a selection window, interpolates data points, and plots joint graphs;
-- `calcula_media`: averages one-gait-cycle segmented angle joint curves.
-- `teste_script`: script created in order to demonstrate the use of the developed module. 
-- `lapsgait`: Module with classes and functions for analyze gait signals created from the unification of the calcula_angulo and calcula_media scripts. Keeping the initial objective of both.
+- `test_script`: this script demonstrates the usage of some `lapsgait` functionalities. 
+- `lapsgait`: module with classes and functions to process gait signals.
+- *`calcula_angulo`: (deprecated) estimates angles of lower limb joints (hip, knee, and ankle) from points of interest data read from OpenPose output JSON files, segments data from a selection window, interpolates data points, and plots joint graphs;
+- `calcula_media`: (deprecated) averages one-gait-cycle segmented angle joint curves.*
 
 The very fist version of these scripts is credited to Frederico Lopes (@fredlopes)
 
@@ -24,10 +24,7 @@ The very fist version of these scripts is credited to Frederico Lopes (@fredlope
 
 ## Howto
 
-- `calcula_angulo`
-- `calcula_media`
-- `teste_script`
-- `lapsgait`
+- `python3 teste_script`
 
 ## Contact
 - laps@ufpa.br
