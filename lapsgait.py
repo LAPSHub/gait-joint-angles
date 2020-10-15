@@ -387,10 +387,11 @@ def segments2matrix(segs: list, method: str = 'cut') -> np.array:
         List of arrays, each one of which containing a joint signal segment
 
     method: string
-        Method used to reshape smaller segments (zeros: smaller
-        signals are simply filled with zeros)
-        Method used to reshape larger segments (default=cut: larger
-        signals are simply cut)
+        Method used to reshape segments:
+            'zeros': segments are filled with zeros until the size of the 
+                    largest segment; 
+            'cut': segments are cropped to match the size of the smallest
+                    segment
 
     Returns
     -------
