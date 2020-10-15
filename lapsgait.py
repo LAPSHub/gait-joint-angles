@@ -378,7 +378,7 @@ def segmented(joint_angles: pd.DataFrame ) -> dict :
     return segmented_angles
 
 
-def segments2matrix(segs: list, method: str = 'zeros' ) -> np.array :
+def segments2matrix(segs: list, method: str = 'cut') -> np.array:
     """ Convert a colection of joint segments into a single matrix.
 
     Parameters
@@ -387,8 +387,11 @@ def segments2matrix(segs: list, method: str = 'zeros' ) -> np.array :
         List of arrays, each one of which containing a joint signal segment
 
     method: string
-        Method used to reshape smaller segments (default=zeros: smaller 
-        signals are simply filled with zeros)
+        Method used to reshape segments:
+            'zeros': segments are filled with zeros until the size of the 
+                    largest segment; 
+            'cut': segments are cropped to match the size of the smallest
+                    segment
 
     Returns
     -------
@@ -405,16 +408,35 @@ def segments2matrix(segs: list, method: str = 'zeros' ) -> np.array :
             max_length = len(item)
         lst_arrays.append(list(item))
 
-    # checks the method (for now, fills in with zeros)
+    # print('Max length: ', max_length)
+
+    # calculates the size of the smallest segment
+    min_length = max_length
+    for item in segs:
+        if len(item) < min_length:
+            min_length = len(item)
+
+    # vefifica o método (por enquanto, preenche de zeros)
     if method == 'zeros':
         for item in lst_arrays:
+            # print(item)
             if len(item) < max_length:
                 diff = max_length - len(item)
                 for new in range(diff):
                     item.append(0)
+            # print(item)
+
+    # cuts excess elements
+    if method == 'cut':
+        for item in lst_arrays:
+            if len(item) > min_length:
+                diff = len(item) - min_length
+                for cut in range(diff):
+                    item.pop()
 
     matrix_of_segments = np.array(lst_arrays)
-    
+    # print( matrix_of_segments.shape)
+
     return matrix_of_segments
 
 
