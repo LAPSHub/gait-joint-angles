@@ -136,7 +136,7 @@ def segment(data: list, indexes: list) -> list:
     return segments
 
 
-def read_data( path_to_data_files: str ) -> list:
+def read_data(path_to_data_files: str, segment_left: list, segment_right: list) -> list:
     """ Read openpose data, and select anatomical points of interest for 
     futher analysis and processing.     
 
@@ -144,6 +144,12 @@ def read_data( path_to_data_files: str ) -> list:
     ----------
     path_to_data_files : str
         The file location of the data file
+
+    segment_left : list
+        List containing the start and end periods when the left side is visible to the camera
+
+    segment_right : list
+        List containing the start and end periods when the right side is visible to the camera
 
     Returns
     -------
@@ -181,6 +187,22 @@ def read_data( path_to_data_files: str ) -> list:
     ra = []
     rf = []
     rhe = []
+
+    start_left = []
+    end_left = []
+    start_right = []
+    end_right = []
+    sl = segment_left
+    sr = segment_right
+
+    #separates the beginning and the ending of the periods
+    for n in range(len(sl)) and range(len(sr)):
+        if n % 2 == 0:
+            start_left.append(sl[n])
+            start_right.append(sr[n])
+        else:
+            end_left.append(sl[n])
+            end_right.append(sr[n])
 
     # read the json files
     # --- rfz: deve haver uma maneira mais fácil de fazer ---
@@ -288,34 +310,36 @@ def read_data( path_to_data_files: str ) -> list:
         rhe.insert(index, right_heel)
 
         # calculates angles
-        if index > 110:
-            if get_angle(trunk, mid_hip, left_knee, 'hip') != None:
-                lha = get_angle(trunk, mid_hip, left_knee, 'hip')
-                left_hip_angle.insert(index, lha)
+        for k in range(len(start_left)):
+            if start_left[k] <= index <= end_left[k]:
+                if get_angle(trunk, mid_hip, left_knee, 'hip') != None:
+                    lha = get_angle(trunk, mid_hip, left_knee, 'hip')
+                    left_hip_angle.insert(index, lha)
 
-            if get_angle(left_hip, left_knee, left_ankle, 'knee') != None:
-                lka = get_angle(left_hip, left_knee, left_ankle, 'knee')
-                left_knee_angle.insert(index, lka)
+                if get_angle(left_hip, left_knee, left_ankle, 'knee') != None:
+                    lka = get_angle(left_hip, left_knee, left_ankle, 'knee')
+                    left_knee_angle.insert(index, lka)
 
-            if get_angle(left_knee, left_ankle, left_foot, 'ankle') != None:
-                laa = get_angle(left_knee, left_ankle, left_foot, 'ankle')
-                left_ankle_angle.insert(index, laa)
+                if get_angle(left_knee, left_ankle, left_foot, 'ankle') != None:
+                    laa = get_angle(left_knee, left_ankle, left_foot, 'ankle')
+                    left_ankle_angle.insert(index, laa)
 
         if head[1] != None:
             head_pos.insert(index, head[1])
 
-        if index < 85:
-            if get_angle(trunk, right_hip, right_knee, 'hip') != None:
-                rha = 180 - get_angle(trunk, right_hip, right_knee, 'hip')
-                right_hip_angle.insert(index, rha)
+        for k in range(len(start_right)):
+            if start_right[k] <= index <= end_right[k]:
+                if get_angle(trunk, right_hip, right_knee, 'hip') != None:
+                    rha = 180 - get_angle(trunk, right_hip, right_knee, 'hip')
+                    right_hip_angle.insert(index, rha)
 
-            if get_angle(right_hip, right_knee, right_ankle, 'knee') != None:
-                rka = 180 - get_angle(right_hip, right_knee, right_ankle, 'knee')
-                right_knee_angle.insert(index, rka)
+                if get_angle(right_hip, right_knee, right_ankle, 'knee') != None:
+                    rka = 180 - get_angle(right_hip, right_knee, right_ankle, 'knee')
+                    right_knee_angle.insert(index, rka)
 
-            if get_angle(right_knee, right_ankle, right_foot, 'ankle') != None:
-                raa = 90 - get_angle(right_knee, right_ankle, right_foot, 'ankle')
-                right_ankle_angle.insert(index, raa)
+                if get_angle(right_knee, right_ankle, right_foot, 'ankle') != None:
+                    raa = 90 - get_angle(right_knee, right_ankle, right_foot, 'ankle')
+                    right_ankle_angle.insert(index, raa)
 
 
     # passes the angles through a Gaussian filter (standard deviation = sigma)
