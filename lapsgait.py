@@ -7,7 +7,7 @@ import math
 import numpy as np
 import scipy.ndimage
 import pandas as pd
-
+from scipy.interpolate import interp1d
 
 def get_angle(pair_1: np.array, pair_2: np.array, pair_3: np.array, 
         which_part: str)-> float:
@@ -404,7 +404,7 @@ def segmented(joint_angles: pd.DataFrame ) -> dict :
     return segmented_angles
 
 
-def segments2matrix(segs: list, method: str = 'cut') -> np.array:
+def segments2matrix(segs: list, method: str = 'interpol') -> np.array:
     """ Convert a colection of joint segments into a single matrix.
 
     Parameters
@@ -432,6 +432,7 @@ def segments2matrix(segs: list, method: str = 'cut') -> np.array:
     for item in segs:
         if len(item) > max_length:
             max_length = len(item)
+            print(max_length)
         lst_arrays.append(list(item))
 
     # print('Max length: ', max_length)
@@ -445,7 +446,7 @@ def segments2matrix(segs: list, method: str = 'cut') -> np.array:
     # vefifica o método (por enquanto, preenche de zeros)
     if method == 'zeros':
         for item in lst_arrays:
-            # print(item)
+            print(item)
             if len(item) < max_length:
                 diff = max_length - len(item)
                 for new in range(diff):
@@ -459,6 +460,19 @@ def segments2matrix(segs: list, method: str = 'cut') -> np.array:
                 diff = len(item) - min_length
                 for cut in range(diff):
                     item.pop()
+
+    # equals the length of the elements
+    if method == 'interpol':
+        L_lst_arrays = len(lst_arrays)
+        for item in range(L_lst_arrays):
+            print(len(lst_arrays[item]))
+            if len(lst_arrays[item]) <= max_length:
+                L_item = np.int(len(lst_arrays[item]))
+                x_max_length = np.linspace(0, 1, max_length)
+                x_item = np.linspace(0, 1, L_item)
+                y_item = lst_arrays[item]
+                y_item_inter = np.interp(x_max_length, x_item, y_item)
+                lst_arrays[item] = y_item_inter
 
     matrix_of_segments = np.array(lst_arrays)
     # print( matrix_of_segments.shape)
