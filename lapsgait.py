@@ -109,33 +109,6 @@ def detect_segment(data):
     return indexes
 
 
-def segment(data: list, indexes: list) -> list:
-    """ Segment complete joint angle signals according to gait cycles. 
-
-    Parameters
-    ----------
-    data : list
-        Joint angle signal
-
-    indexes: list
-        Indexes indicating the gait cycles limits in data
-
-    Returns
-    -------
-    segments: dict
-        A dictionary of lists containing the segments of joint angles
-    """
-    
-    segments = []
-    for index, js in enumerate(indexes[:-1]):
-        start = indexes[index]
-        finish = indexes[index + 1]
-        segdata = data[start:finish]
-        segments.append(segdata)
-
-    return segments
-
-
 def read_data(path_to_data_files: str, segment_left: list, segment_right: list) -> list:
     """ Read openpose data, and select anatomical points of interest for 
     futher analysis and processing.     
@@ -365,6 +338,127 @@ def read_data(path_to_data_files: str, segment_left: list, segment_right: list) 
     joint_angles.columns = ['head', 'left_knee', 'left_hip', 'left_ankle', 'right_knee', 'right_hip', 'right_ankle']
 
     return anatomical_points, joint_angles
+
+
+def segment(data: list, indexes: list, method: str = 'eliminate_index_e') -> dict:
+    """ Segment complete joint angle signals according to gait cycles.
+
+    Parameters
+    ----------
+    data : list
+       Joint angle signal
+
+    indexes: list
+       Indexes indicating the gait cycles limits in data
+
+    method: string
+        Method used to validate gait cycles (indexes):
+
+            'old_segment': old form of segmentation, uses all indexes;
+            'cut_segment': excludes segments that are too small;
+            'eliminate_index': excludes start_indexes of segments that
+                              are too small;
+            'eliminate_index_e': excludes start_indexes of segments that
+                                are too small and catches the exception
+                                when it occurs twice in a row;
+
+    Returns
+    -------
+    segments: dict
+        A dictionary of lists containing the segments of joint angles
+    """
+
+    lengh = []
+    ipc_total = []
+    ipc = 0
+    valid_i = []
+    valid_f = []
+    valid = []
+    invalid = []
+    i = 0
+    key = 0
+
+    # calculates the average of segment sizes
+    for index, js in enumerate(indexes[:-1]):
+        l = indexes[index + 1] - indexes[index]
+        lengh.append(l)
+    med = np.mean(lengh)
+
+    # find the Initial Potential Cycle (ipc)
+    for index in range(len(indexes[:-1])):
+        if (indexes[index + 1] - indexes[index]) > (0.75 * med) and (indexes[index + 1] - indexes[index]) < (1.4 * med):
+            ipc_total.append(indexes[index + 1] - indexes[index])
+            diffs = {value: abs(value - med) for value in ipc_total}
+            ipc = min(diffs, key=diffs.get)
+
+    if method == 'old_segment':
+        segments = []
+        for index, js in enumerate(indexes[:-1]):
+            start = indexes[index]
+            finish = indexes[index + 1]
+            segdata = data[start:finish]
+            segments.append(segdata)
+
+    if method == 'cut_segment':
+        for index in range(len(indexes[:-1])):
+            if (indexes[index + 1] - indexes[index]) > (0.75 * ipc):
+                valid_i.append(indexes[index])
+                valid_f.append(indexes[index + 1])
+            else:
+                invalid.append(indexes[index])
+
+        segments = []
+        for index, js in enumerate(valid_i):
+            start = valid_i[index]
+            finish = valid_f[index]
+            segdata = data[start:finish]
+            segments.append(segdata)
+
+    if method == 'eliminate_index':
+        for index in range(len(indexes[:-1])):
+            if (indexes[index + 1] - indexes[index]) > (0.75 * ipc):
+                valid_i.append(indexes[index])
+            else:
+                invalid.append(indexes[index])
+
+        valid.extend(valid_i)
+        valid.append(indexes[-1])
+
+        segments = []
+        for index, js in enumerate(valid[:-1]):
+            start = valid[index]
+            finish = valid[index+1]
+            segdata = data[start:finish]
+            segments.append(segdata)
+
+    if method == 'eliminate_index_e':
+        for index in range(len(indexes[:-1])):
+            if (indexes[index + 1] - indexes[index]) < (0.75 * ipc):
+                invalid.append(indexes[index])
+                i = i+1
+                if (indexes[index + 1] - indexes[index]) < (0.75 * ipc) and i > 1:
+                    valid_i.append(indexes[index])
+                    key = indexes[index + 1]
+                    invalid.append(indexes[index+1])
+                    i = i-1
+            else:
+                if indexes[index] != key:
+                    valid_i.append(indexes[index])
+                if i == 1:
+                    i = i-1
+
+        valid.extend(valid_i)
+        valid.append(indexes[-1])
+
+        segments = []
+        for index, js in enumerate(valid[:-1]):
+            start = valid[index]
+            finish = valid[index+1]
+            segdata = data[start:finish]
+            segments.append(segdata)
+
+
+    return segments
 
 
 def segmented(joint_angles: pd.DataFrame ) -> dict :

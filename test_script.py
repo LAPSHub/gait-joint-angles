@@ -5,8 +5,8 @@ import matplotlib.pyplot as plt
 
 # path to .json files
 path_to_json = './keypoints/v04'
-segment_left = [334, 791]
-segment_right = [0, 333]
+segment_left = [500, 821]
+segment_right = [0, 340]
 
 # read .json data and calculate joint angles
 anatomical_points, joint_angles = lg.read_data(path_to_json, segment_left, segment_right) #implemented, need test
