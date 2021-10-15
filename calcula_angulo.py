@@ -25,7 +25,9 @@ import scipy.ndimage
 #						(|ba|*|bx|)
 #------------------------------------------------------------------------------------
 #a seguinte funcao pega 3 pontos p(x,y),o primeiro corresponde ao membro mais alto,o segundo e o medio e o terceiro o mais baixo
-def get_angle(superior,central,inferior,qual_parte):
+# Além disso pega a direção em que o corpo se encaminha.
+
+def get_angle(superior,central,inferior,qual_parte,direcao):
     if superior[0] == 0 or superior[1] == 0 or central[0] == 0 or central[1] == 0 or inferior[0] == 0 or inferior[1] == 0:
         angulo = 0
     else:
@@ -33,42 +35,65 @@ def get_angle(superior,central,inferior,qual_parte):
         v2 = inferior - central
 
         if qual_parte == 'joelho':
-            referencia = (-v1/np.linalg.norm(v1))*np.linalg.norm(v2)
-            # prod_vetorial não é usado por se tratar de aplicação em 2d
-            #prod_vetorial = np.linalg.norm(np.cross(v1,v2))/(np.linalg.norm(v1)*np.linalg.norm(v2))
-            prod_escalar = np.arccos(np.dot(v1, v2) / (np.linalg.norm(v1) * np.linalg.norm(v2)))
-            
-            if v2[1]>referencia[1]:
-                angulo = np.rad2deg(prod_escalar - np.pi)
 
-            else:
-                angulo = np.rad2deg(math.pi - prod_escalar)
+        referencia = -(v1/np.linalg.norm(v1))*np.linalg.norm(v2)
 
-        if qual_parte == 'quadril':
-            referencia = (-v1/np.linalg.norm(v1))*np.linalg.norm(v2)
+        prod_escalar = np.arccos(np.dot(v1, v2) / (np.linalg.norm(v1) * np.linalg.norm(v2)))
 
-            # prod_vetorial não é usado por se tratar de aplicação em 2d
-            #prod_vetorial = np.linalg.norm(np.cross(v1,v2))/(np.linalg.norm(v1)*np.linalg.norm(v2))
-            prod_escalar = np.arccos(np.dot(v1, v2) / (np.linalg.norm(v1) * np.linalg.norm(v2)))
-
+        if direcao == 0:
+        #Quando o valor for 0, a direção é para a direita
             if v2[0]>referencia[0]:
                 angulo = np.rad2deg(prod_escalar - np.pi)
-
+            elif v2[0] == referencia[0]:
+                angulo = 0
             else:
-                angulo = np.rad2deg(math.pi - prod_escalar)
+                angulo = np.rad2deg(np.pi - prod_escalar)
+
+        else:
+        #Quando o valor for 1, a direção é para a esquerda
+            if v2[0]>referencia[0]:
+                angulo = np.rad2deg(np.pi - prod_escalar)
+            elif v2[0] == referencia[0]:
+                angulo = 0
+            else:
+                angulo = np.rad2deg(prod_escalar - np.pi)
+
+        if qual_parte == 'quadril':
+            referencia = -(v1/np.linalg.norm(v1))*np.linalg.norm(v2)
+
+            prod_escalar = np.arccos(np.dot(v1, v2) / (np.linalg.norm(v1) * np.linalg.norm(v2)))
+            if direcao == 0:
+            #Quando o valor for 0, a direção é para a direita
+                if v2[0]>referencia[0]:
+                    angulo = np.rad2deg(math.pi - prod_escalar)
+
+                else:
+                    angulo = np.rad2deg(prod_escalar - math.pi)
+            else:
+            #Quando o valor for 1, a direção é para a esquerda
+                if v2[0]>referencia[0]:
+                    angulo = np.rad2deg(prod_escalar - np.pi)
+
+                else:
+                    angulo = np.rad2deg(math.pi - prod_escalar)
 
         if qual_parte == 'tornozelo':
             referencia = v1[1],-v1[0]
             referencia = (referencia/np.linalg.norm(v1))*np.linalg.norm(v2)
 
-            # prod_vetorial não é usado por se tratar de aplicação em 2d
-            #prod_vetorial = np.linalg.norm(np.cross(referencia,v2))/(np.linalg.norm(referencia)*np.linalg.norm(v2))
             prod_escalar = np.arccos(np.dot(referencia, v2) / (np.linalg.norm(referencia) * np.linalg.norm(v2)))
-
-            if v2[1]<referencia[1]:
-                angulo = -np.rad2deg(prod_escalar)
+            if direcao == 0:
+            #Quando o valor for 0, a direção é para a direita
+                if v2[1]<referencia[1]:
+                    angulo = -np.rad2deg(prod_escalar)
+                else:
+                    angulo = np.rad2deg(prod_escalar)
             else:
-                angulo = np.rad2deg(prod_escalar)
+            #Quando o valor for 1, a direção é para a esquerda
+                if v2[1]<referencia[1]:
+                    angulo = -np.rad2deg(np.pi - prod_escalar)
+                else:
+                    angulo = np.rad2deg(np.pi - prod_escalar)
     return angulo
 #------------------------------------------------------------------------------------
 #funcao que pega os dados dos angulos e tenta segmenta-los por meio de relacoes de derivadas, ele retorna os indices para inicio/fim de cada ciclo
