@@ -99,9 +99,9 @@ def get_angle(pair_1: np.array, pair_2: np.array, pair_3: np.array,
                     angle = np.rad2deg(dot_product)
             else:
                 if v2[1] < reference[1]:
-                    angle = -np.rad2deg(np.pi - prod_escalar)
+                    angle = -np.rad2deg(np.pi - dot_product)
                 else:
-                    angle = np.rad2deg(np.pi - prod_escalar)
+                    angle = np.rad2deg(np.pi - dot_product)
                 
     return angle
 
