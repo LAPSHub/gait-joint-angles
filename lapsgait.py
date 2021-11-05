@@ -52,19 +52,19 @@ def get_angle(pair_1: np.array, pair_2: np.array, pair_3: np.array,
             dot_product = np.arccos(np.dot(v1, v2) / (np.linalg.norm(v1) * np.linalg.norm(v2)))
 
             if direction == 'right':
-                if v2[0] > reference[0]:
-                    angle = np.rad2deg(dot_product - np.pi)
+                if v2[0] < reference[0]:
+                    angle = np.rad2deg(np.pi - dot_product)
                 elif v2[0] == reference[0]:
                     angle = 0
                 else:
-                    angle = np.rad2deg(np.pi - dot_product)
+                    angle = -np.rad2deg(np.pi - dot_product)
             else:
-                if v2[0] > reference[0]:
-                    angle = np.rad2deg(np.pi - dot_product)
+                if v2[0] < reference[0]:
+                    angle = -np.rad2deg(np.pi - dot_product)
                 elif v2[0] == reference[0]:
                     angle = 0
                 else:
-                    angle = np.rad2deg(dot_product - np.pi)
+                    angle = np.rad2deg(np.pi - dot_product)
 
         if which_part == 'hip':
             reference = (-v1 / np.linalg.norm(v1)) * np.linalg.norm(v2)
@@ -311,16 +311,16 @@ def read_data(path_to_data_files: str, segment_left: list, segment_right: list) 
         # calculates angles
         for k in range(len(start_left)):
             if start_left[k] <= index <= end_left[k]:
-                if get_angle(trunk, mid_hip, left_knee, 'hip', 'right') != None:
-                    lha = get_angle(trunk, mid_hip, left_knee, 'hip', 'right')
+                if get_angle(trunk, mid_hip, left_knee, 'hip', 'left') != None:
+                    lha = get_angle(trunk, mid_hip, left_knee, 'hip', 'left')
                     left_hip_angle.insert(index, lha)
 
-                if get_angle(left_hip, left_knee, left_ankle, 'knee', 'right') != None:
-                    lka = get_angle(left_hip, left_knee, left_ankle, 'knee', 'right')
+                if get_angle(left_hip, left_knee, left_ankle, 'knee', 'left') != None:
+                    lka = get_angle(left_hip, left_knee, left_ankle, 'knee', 'left')
                     left_knee_angle.insert(index, lka)
 
-                if get_angle(left_knee, left_ankle, left_foot, 'ankle', 'right') != None:
-                    laa = get_angle(left_knee, left_ankle, left_foot, 'ankle', 'right')
+                if get_angle(left_knee, left_ankle, left_foot, 'ankle', 'left') != None:
+                    laa = get_angle(left_knee, left_ankle, left_foot, 'ankle', 'left')
                     left_ankle_angle.insert(index, laa)
 
         if head[1] != None:
@@ -328,16 +328,16 @@ def read_data(path_to_data_files: str, segment_left: list, segment_right: list) 
 
         for k in range(len(start_right)):
             if start_right[k] <= index <= end_right[k]:
-                if get_angle(trunk, right_hip, right_knee, 'hip', 'right') != None:
-                    rha = 180 - get_angle(trunk, right_hip, right_knee, 'hip', 'right')
+                if get_angle(trunk, right_hip, right_knee, 'hip', 'left') != None:
+                    rha = get_angle(trunk, right_hip, right_knee, 'hip', 'left')
                     right_hip_angle.insert(index, rha)
 
-                if get_angle(right_hip, right_knee, right_ankle, 'knee', 'right') != None:
-                    rka = 180 - get_angle(right_hip, right_knee, right_ankle, 'knee', 'right')
+                if get_angle(right_hip, right_knee, right_ankle, 'knee', 'left') != None:
+                    rka = get_angle(right_hip, right_knee, right_ankle, 'knee', 'left')
                     right_knee_angle.insert(index, rka)
 
-                if get_angle(right_knee, right_ankle, right_foot, 'ankle', 'right') != None:
-                    raa = 90 - get_angle(right_knee, right_ankle, right_foot, 'ankle', 'right')
+                if get_angle(right_knee, right_ankle, right_foot, 'ankle', 'left') != None:
+                    raa = get_angle(right_knee, right_ankle, right_foot, 'ankle', 'left')
                     right_ankle_angle.insert(index, raa)
 
 
