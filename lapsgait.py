@@ -40,68 +40,66 @@ def get_angle(pair_1: np.array, pair_2: np.array, pair_3: np.array,
     # todo: translate variable names to english
 
     if pair_1[0] == None or pair_1[1] == None or pair_2[0] == None or pair_2[1] == None or pair_3[0] == None or pair_3[
-        1] == None:
+        1] == None: 
         angle = None
-    else:
+    else:                   #Create vectors used for the calculation
         v1 = pair_1 - pair_2
         v2 = pair_3 - pair_2
 
         if which_part == 'knee':
-            reference = (-v1 / np.linalg.norm(v1)) * np.linalg.norm(v2)
+            reference = (-v1 / np.linalg.norm(v1)) * np.linalg.norm(v2) #Create reference vector to differentiate flexion and extension
             
-            dot_product = np.arccos(np.dot(v1, v2) / (np.linalg.norm(v1) * np.linalg.norm(v2)))
+            angle_v1v2 = np.arccos(np.dot(v1, v2) / (np.linalg.norm(v1) * np.linalg.norm(v2))) #Calculates angle between v1 and v2 
 
-            if direction == 'right':
+            if direction == 'right': #Calculation for the right leg 
                 if v2[0] < reference[0]:
-                    angle = np.rad2deg(np.pi - dot_product)
+                    angle = np.rad2deg(np.pi - angle_v1v2)
                 elif v2[0] == reference[0]:
                     angle = 0
                 else:
-                    angle = -np.rad2deg(np.pi - dot_product)
-            else:
+                    angle = -np.rad2deg(np.pi - angle_v1v2)
+            else: #Calculation for the left leg
                 if v2[0] < reference[0]:
-                    angle = -np.rad2deg(np.pi - dot_product)
+                    angle = -np.rad2deg(np.pi - angle_v1v2)
                 elif v2[0] == reference[0]:
                     angle = 0
                 else:
-                    angle = np.rad2deg(np.pi - dot_product)
+                    angle = np.rad2deg(np.pi - angle_v1v2)
 
         if which_part == 'hip':
-            reference = (-v1 / np.linalg.norm(v1)) * np.linalg.norm(v2)
+            reference = (-v1 / np.linalg.norm(v1)) * np.linalg.norm(v2) #Create reference vector to differentiate flexion and extension
+            angle_v1v2 = np.arccos(np.dot(v1, v2) / (np.linalg.norm(v1) * np.linalg.norm(v2))) #Calculates angle between v1 and v2
 
-            
-            dot_product = np.arccos(np.dot(v1, v2) / (np.linalg.norm(v1) * np.linalg.norm(v2)))
-
-            if direction == 'right':
+            if direction == 'right': #Calculation for the right leg
                 if v2[0] > reference[0]:
-                    angle = np.rad2deg(np.pi - dot_product)
+                    angle = np.rad2deg(np.pi - angle_v1v2)
 
                 else:
-                    angle = np.rad2deg(dot_product - np.pi)
-            else:
+                    angle = np.rad2deg(angle_v1v2 - np.pi)
+            else: #Calculation for the left leg
                 if v2[0] > reference[0]:
-                    angle = np.rad2deg(dot_product - np.pi)
+                    angle = np.rad2deg(angle_v1v2 - np.pi)
 
                 else:
-                    angle = np.rad2deg(np.pi - dot_product)
+                    angle = np.rad2deg(np.pi - angle_v1v2)
 
         if which_part == 'ankle':
-            reference = v1[1], -v1[0]
+            reference = v1[1], -v1[0] #Create reference vector to differentiate flexion and extension
             reference = (reference / np.linalg.norm(v1)) * np.linalg.norm(v2)
 
-            if direction == 'right':
-                reference = -reference
-                dot_product = np.arccos(np.dot(reference, v2) / (np.linalg.norm(reference) * np.linalg.norm(v2)))
+            if direction == 'right': #Calculation for the right leg
+                reference = -reference #invert reference to adjust right
+                angle_v1v2 = np.arccos(np.dot(reference, v2) / (np.linalg.norm(reference) * np.linalg.norm(v2))) #Calculates angle between v1 and v2
                 if v2[1] > reference[1]:
-                    angle = -np.rad2deg(dot_product)
+                    angle = -np.rad2deg(angle_v1v2)
                 else:
-                    angle = np.rad2deg(dot_product)
-            else:
-                dot_product = np.arccos(np.dot(reference, v2) / (np.linalg.norm(reference) * np.linalg.norm(v2)))
+                    angle = np.rad2deg(angle_v1v2)
+            else: #Calculation for the left leg
+                angle_v1v2 = np.arccos(np.dot(reference, v2) / (np.linalg.norm(reference) * np.linalg.norm(v2))) #Calculates angle between v1 and v2
                 if v2[1] > reference[1]:
-                    angle = -np.rad2deg(dot_product)
+                    angle = -np.rad2deg(angle_v1v2)
                 else:
-                    angle = np.rad2deg(dot_product)
+                    angle = np.rad2deg(angle_v1v2)
                 
     return angle
 
